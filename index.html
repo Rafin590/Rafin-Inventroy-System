@@ -6946,15 +6946,6 @@
       }
 
       openModal('modal-receipt');
-      
-      // Auto-trigger clean receipt print via iframe
-      setTimeout(() => {
-        try {
-          printReceiptDirect();
-        } catch (pErr) {
-          console.warn('Auto-print dialog notice:', pErr);
-        }
-      }, 450);
     }
 
     // --- High-Reliability Isolated Iframe Printing Engine ---
