@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enterprise ERP & Inventory POS</title>
-  <!-- Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -51,7 +50,7 @@
       </nav>
     </div>
     <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-      v2.2 Editable Release
+      v2.3 Visual Release
     </div>
   </aside>
 
@@ -104,6 +103,7 @@
             <table class="w-full text-left text-sm">
               <thead class="bg-gray-50 text-gray-500">
                 <tr>
+                  <th class="p-2">Image</th>
                   <th class="p-2">SKU</th>
                   <th class="p-2">Product</th>
                   <th class="p-2">Current Stock</th>
@@ -120,15 +120,15 @@
       <!-- 2. POS SCREEN -->
       <section id="tab-pos" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-4">
-          <input type="text" id="posSearch" placeholder="Search by product name or SKU..." oninput="renderPosProducts()" class="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg text-sm focus:outline-blue-500">
+          <input type="text" id="posSearch" placeholder="Search product name or SKU..." oninput="renderPosProducts()" class="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg text-sm focus:outline-blue-500">
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="posProductGrid"></div>
         </div>
 
         <!-- POS Cart -->
-        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between h-[600px]">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between h-[620px]">
           <div>
             <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">Billing Details</h3>
-            <div class="overflow-y-auto max-h-52 divide-y text-sm" id="cartItemsList"></div>
+            <div class="overflow-y-auto max-h-56 divide-y text-sm" id="cartItemsList"></div>
           </div>
           <div class="border-t pt-3 space-y-2 text-sm">
             <div class="flex justify-between font-semibold">
@@ -169,12 +169,14 @@
         </div>
       </section>
 
-      <!-- 3. PRODUCTS & STOCK (WITH EDIT & DELETE) -->
+      <!-- 3. PRODUCTS & STOCK (WITH IMAGE UPLOAD) -->
       <section id="tab-products" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="font-bold text-gray-800 mb-4 text-sm" id="prodFormTitle">Add New Product</h3>
           <form id="productForm" onsubmit="saveProduct(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
             <input type="hidden" id="pEditIndex" value="-1">
+            <input type="hidden" id="pImageData" value="">
+            
             <input type="text" id="pSKU" placeholder="SKU (e.g. TS-001)" required class="border p-2 rounded">
             <input type="text" id="pName" placeholder="Product Name" required class="border p-2 rounded">
             <input type="text" id="pCategory" placeholder="Category" class="border p-2 rounded">
@@ -182,7 +184,16 @@
             <input type="number" id="pSalePrice" placeholder="Sale Price (৳)" required class="border p-2 rounded">
             <input type="number" id="pStock" placeholder="Current Stock" required class="border p-2 rounded">
             <input type="number" id="pMinStock" placeholder="Min Stock Alert" required class="border p-2 rounded">
-            <div class="flex gap-2">
+            
+            <div class="md:col-span-2">
+              <label class="block text-xs text-gray-500 mb-1">Product Picture (Upload File or URL)</label>
+              <div class="flex gap-2">
+                <input type="file" id="pImageFile" accept="image/*" onchange="handleImageUpload(event)" class="border p-1.5 rounded text-xs w-1/2">
+                <input type="url" id="pImageUrl" placeholder="Or Image Link..." oninput="handleImageUrlInput(event)" class="border p-2 rounded text-xs w-1/2">
+              </div>
+            </div>
+
+            <div class="flex items-end gap-2 md:col-span-2">
               <button type="submit" id="pSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2">Save Product</button>
               <button type="button" id="pCancelBtn" onclick="resetProductForm()" class="hidden bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded p-2">Cancel</button>
             </div>
@@ -193,6 +204,7 @@
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-gray-600 border-b">
               <tr>
+                <th class="p-3">Image</th>
                 <th class="p-3">SKU</th>
                 <th class="p-3">Product Name</th>
                 <th class="p-3">Category</th>
@@ -208,7 +220,7 @@
         </div>
       </section>
 
-      <!-- 4. SALES HISTORY (WITH CANCEL / DELETE) -->
+      <!-- 4. SALES HISTORY -->
       <section id="tab-saleshistory" class="hidden space-y-4">
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto p-5">
           <h3 class="font-bold text-gray-800 mb-4 text-sm">Recent Sales Invoices</h3>
@@ -252,7 +264,7 @@
       <!-- 6. STOCK OUT / ADJUST -->
       <section id="tab-stockout" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-          <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock Out Entry (Damage / Office / Sample)</h3>
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock Out Entry</h3>
           <form id="stockOutForm" onsubmit="saveStockOut(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
             <select id="outSKU" required class="border p-2 rounded"></select>
             <input type="number" id="outQty" placeholder="Quantity" required class="border p-2 rounded">
@@ -268,7 +280,7 @@
         </div>
       </section>
 
-      <!-- 7. EXPENSE ENTRY (WITH DELETE) -->
+      <!-- 7. EXPENSE ENTRY -->
       <section id="tab-expense" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="font-bold text-gray-800 mb-4 text-sm">Add Operational Expense</h3>
@@ -366,11 +378,12 @@
   </div>
 
   <script>
-    // Storage & In-Memory Data Management
+    const DEFAULT_IMG = 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=150&auto=format&fit=crop&q=60';
+
     let products = JSON.parse(localStorage.getItem('erp_products')) || [
-      { sku: 'TS-001', name: 'Black T-Shirt', category: 'Clothing', buyPrice: 450, salePrice: 650, stock: 40, minStock: 10 },
-      { sku: 'PN-002', name: 'Denim Jeans', category: 'Clothing', buyPrice: 900, salePrice: 1400, stock: 25, minStock: 5 },
-      { sku: 'SH-003', name: 'Sneakers', category: 'Footwear', buyPrice: 1200, salePrice: 1950, stock: 4, minStock: 5 }
+      { sku: 'TS-001', name: 'Black T-Shirt', category: 'Clothing', buyPrice: 450, salePrice: 650, stock: 40, minStock: 10, image: DEFAULT_IMG },
+      { sku: 'PN-002', name: 'Denim Jeans', category: 'Clothing', buyPrice: 900, salePrice: 1400, stock: 25, minStock: 5, image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=150&auto=format&fit=crop&q=60' },
+      { sku: 'SH-003', name: 'Sneakers', category: 'Footwear', buyPrice: 1200, salePrice: 1950, stock: 4, minStock: 5, image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=150&auto=format&fit=crop&q=60' }
     ];
     let sales = JSON.parse(localStorage.getItem('erp_sales')) || [];
     let expenses = JSON.parse(localStorage.getItem('erp_expenses')) || [];
@@ -406,7 +419,23 @@
       updateUI();
     }
 
-    // 1. PRODUCT CRUD (ADD, EDIT, DELETE)
+    // Image Upload & Conversion Logic
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('pImageData').value = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleImageUrlInput(e) {
+      document.getElementById('pImageData').value = e.target.value.trim();
+    }
+
+    // 1. PRODUCT CRUD
     function saveProduct(e) {
       e.preventDefault();
       const editIndex = Number(document.getElementById('pEditIndex').value);
@@ -417,17 +446,16 @@
       const salePrice = Number(document.getElementById('pSalePrice').value);
       const stock = Number(document.getElementById('pStock').value);
       const minStock = Number(document.getElementById('pMinStock').value);
+      let image = document.getElementById('pImageData').value || DEFAULT_IMG;
 
-      const prodObj = { sku, name, category, buyPrice, salePrice, stock, minStock };
+      const prodObj = { sku, name, category, buyPrice, salePrice, stock, minStock, image };
 
       if (editIndex === -1) {
-        // New Product Check
         if (products.some(p => p.sku.toLowerCase() === sku.toLowerCase())) {
-          return alert('এই SKU-র প্রোডাক্ট ইতোমধ্যে যোগ করা আছে!');
+          return alert('এই SKU-র প্রোডাক্ট ইতোমধ্যে বিদ্যমান!');
         }
         products.push(prodObj);
       } else {
-        // Edit Existing Product
         products[editIndex] = prodObj;
       }
 
@@ -445,6 +473,8 @@
       document.getElementById('pSalePrice').value = p.salePrice;
       document.getElementById('pStock').value = p.stock;
       document.getElementById('pMinStock').value = p.minStock;
+      document.getElementById('pImageData').value = p.image || '';
+      document.getElementById('pImageUrl').value = (p.image && !p.image.startsWith('data:')) ? p.image : '';
 
       document.getElementById('prodFormTitle').innerText = `Edit Product: ${p.name}`;
       document.getElementById('pSubmitBtn').innerText = 'Update Product';
@@ -456,6 +486,7 @@
     function resetProductForm() {
       document.getElementById('productForm').reset();
       document.getElementById('pEditIndex').value = -1;
+      document.getElementById('pImageData').value = '';
       document.getElementById('prodFormTitle').innerText = 'Add New Product';
       document.getElementById('pSubmitBtn').innerText = 'Save Product';
       document.getElementById('pSubmitBtn').className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2';
@@ -463,23 +494,21 @@
     }
 
     function deleteProduct(index) {
-      if (confirm(`আপনি কি "${products[index].name}" প্রোডাক্টটি সম্পূর্ণ মুছে ফেলতে চান?`)) {
+      if (confirm(`আপনি কি "${products[index].name}" মুছে ফেলতে চান?`)) {
         products.splice(index, 1);
         saveDB();
       }
     }
 
-    // 2. SALES DELETE & ROLLBACK STOCK
+    // 2. SALES DELETE & ROLLBACK
     function deleteSale(index) {
       const sale = sales[index];
-      if (confirm(`ইনভয়েস ${sale.id} মুছে ফেলতে চান? এটি ডিলিট করলে কাটা স্টক স্বয়ংক্রিয়ভাবে ফেরত যাবে।`)) {
-        // Rollback Stock
+      if (confirm(`ইনভয়েস ${sale.id} মুছে ফেলতে চান? পণ্যগুলো পুনরায় স্টকে ফিরে যাবে।`)) {
         sale.items.forEach(cartItem => {
           const p = products.find(i => i.sku === cartItem.sku);
           if (p) p.stock += cartItem.qty;
         });
 
-        // Delete from Ledger
         const ledgerIndex = ledger.findIndex(l => l.desc.includes(sale.id));
         if (ledgerIndex !== -1) ledger.splice(ledgerIndex, 1);
 
@@ -490,7 +519,7 @@
 
     // 3. EXPENSE DELETE
     function deleteExpense(index) {
-      if (confirm('এই খরচের এন্ট্রিটি মুছে ফেলতে চান?')) {
+      if (confirm('এই খরচের রেকর্ডটি মুছে ফেলতে চান?')) {
         expenses.splice(index, 1);
         saveDB();
       }
@@ -547,7 +576,7 @@
       alert('Expense recorded!');
     }
 
-    // 7. POS CART & CHECKOUT
+    // 7. POS CART WITH PRODUCT PICTURES
     function renderPosProducts() {
       const q = document.getElementById('posSearch').value.toLowerCase();
       const grid = document.getElementById('posProductGrid');
@@ -555,12 +584,15 @@
 
       products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)).forEach(p => {
         grid.innerHTML += `
-          <div onclick="addToCart('${p.sku}')" class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition">
-            <h4 class="font-bold text-gray-800 text-sm">${p.name}</h4>
-            <p class="text-xs text-gray-500">SKU: ${p.sku}</p>
-            <div class="flex justify-between items-center mt-3">
-              <span class="font-bold text-blue-600">৳${p.salePrice}</span>
-              <span class="text-xs ${p.stock <= p.minStock ? 'text-rose-600 font-bold' : 'text-gray-500'}">Stock: ${p.stock}</span>
+          <div onclick="addToCart('${p.sku}')" class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm cursor-pointer hover:border-blue-500 hover:shadow-md transition">
+            <img src="${p.image || DEFAULT_IMG}" class="h-32 w-full object-cover" onerror="this.src='${DEFAULT_IMG}'">
+            <div class="p-3">
+              <h4 class="font-bold text-gray-800 text-sm truncate">${p.name}</h4>
+              <p class="text-[11px] text-gray-400">SKU: ${p.sku}</p>
+              <div class="flex justify-between items-center mt-2">
+                <span class="font-black text-blue-600 text-sm">৳${p.salePrice}</span>
+                <span class="text-[11px] font-semibold ${p.stock <= p.minStock ? 'text-rose-600' : 'text-gray-500'}">Stock: ${p.stock}</span>
+              </div>
             </div>
           </div>
         `;
@@ -586,9 +618,10 @@
       list.innerHTML = '';
       cart.forEach((item, index) => {
         list.innerHTML += `
-          <div class="py-2 flex justify-between items-center">
-            <div>
-              <p class="font-semibold text-xs">${item.name}</p>
+          <div class="py-2 flex items-center justify-between gap-2">
+            <img src="${item.image || DEFAULT_IMG}" class="w-10 h-10 object-cover rounded border" onerror="this.src='${DEFAULT_IMG}'">
+            <div class="flex-1">
+              <p class="font-semibold text-xs truncate">${item.name}</p>
               <span class="text-[10px] text-gray-500">৳${item.salePrice} x ${item.qty}</span>
             </div>
             <div class="flex items-center gap-2">
@@ -678,9 +711,8 @@
       window.print();
     }
 
-    // 8. RENDER UI & TABLES
+    // 8. RENDER UI & DATA LISTS
     function updateUI() {
-      // Dashboard calculation
       let totalSales = 0, totalCOGS = 0, totalCustDue = 0;
       sales.forEach(s => {
         totalSales += s.grandTotal;
@@ -706,6 +738,7 @@
       products.filter(p => p.stock <= p.minStock).forEach(p => {
         lowBody.innerHTML += `
           <tr class="hover:bg-gray-50">
+            <td class="p-2"><img src="${p.image || DEFAULT_IMG}" class="w-8 h-8 rounded object-cover border" onerror="this.src='${DEFAULT_IMG}'"></td>
             <td class="p-2 font-mono">${p.sku}</td>
             <td class="p-2">${p.name}</td>
             <td class="p-2 font-bold text-rose-600">${p.stock}</td>
@@ -715,7 +748,7 @@
         `;
       });
 
-      // Products Table with Edit/Delete Buttons
+      // Products Table
       const prodBody = document.getElementById('productTableBody');
       const purSelect = document.getElementById('purSKU');
       const outSelect = document.getElementById('outSKU');
@@ -726,6 +759,7 @@
       products.forEach((p, idx) => {
         prodBody.innerHTML += `
           <tr class="hover:bg-gray-50">
+            <td class="p-3"><img src="${p.image || DEFAULT_IMG}" class="w-10 h-10 rounded object-cover border" onerror="this.src='${DEFAULT_IMG}'"></td>
             <td class="p-3 font-mono font-medium">${p.sku}</td>
             <td class="p-3 font-semibold text-gray-800">${p.name}</td>
             <td class="p-3">${p.category}</td>
@@ -812,7 +846,7 @@
       }
     }
 
-    // Initial Render
+    // Initial Execution
     updateUI();
   </script>
 </body>
