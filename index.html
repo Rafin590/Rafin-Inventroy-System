@@ -16,8 +16,10 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-  <!-- Supabase JS Client v2 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Firebase JS SDK (v10 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -294,14 +296,14 @@
         </button>
       </form>
 
-      <!-- Supabase Cloud Indicator -->
+      <!-- Firebase Cloud Indicator -->
       <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
         <span class="flex items-center space-x-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          <span class="font-semibold text-slate-600" id="login-db-status">PostgreSQL Ready</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="login-db-dot"></span>
+          <span class="font-semibold text-slate-600" id="login-db-status">Firebase: Live (inventory-c78b4)</span>
         </span>
-        <button type="button" onclick="openSupabaseSettingsModal()" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center space-x-1">
-          <i class="fa-solid fa-gear"></i><span>DB Config</span>
+        <button type="button" onclick="openFirebaseSettingsModal()" class="text-emerald-700 hover:text-emerald-900 font-bold flex items-center space-x-1">
+          <i class="fa-solid fa-fire text-amber-500"></i><span>Cloud Settings</span>
         </button>
       </div>
 
@@ -416,9 +418,9 @@
             </div>
             <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-indigo-500/25 text-indigo-300 border border-indigo-500/40">ROLES</span>
           </button>
-          <button id="nav-database" onclick="openSupabaseSettingsModal()" class="sidebar-nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-emerald-200/80 hover:text-white transition">
+          <button id="nav-database" onclick="openFirebaseSettingsModal()" class="sidebar-nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-emerald-200/80 hover:text-white transition">
             <div class="flex items-center space-x-3">
-              <i class="fa-solid fa-database text-teal-400 w-4 text-center"></i><span>PostgreSQL DB</span>
+              <i class="fa-solid fa-fire text-amber-400 w-4 text-center"></i><span>Firebase Cloud</span>
             </div>
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           </button>
@@ -460,10 +462,10 @@
             </div>
           </div>
 
-          <!-- PostgreSQL / Supabase Live Pill (Only visible to Admin) -->
-          <div id="header-db-pill" onclick="openSupabaseSettingsModal()" class="cursor-pointer flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl transition">
+          <!-- Firebase Cloud Live Pill (Only visible to Admin) -->
+          <div id="header-db-pill" onclick="openFirebaseSettingsModal()" class="cursor-pointer flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-xl transition">
             <span class="w-2 h-2 rounded-full bg-emerald-500" id="header-db-dot"></span>
-            <span class="text-[11px] font-bold text-slate-700" id="header-db-label">PostgreSQL: Active</span>
+            <span class="text-[11px] font-bold text-slate-700" id="header-db-label">Firebase: Live</span>
           </div>
 
           <!-- POS Quick Trigger Button -->
@@ -2088,11 +2090,12 @@
               </div>
               <div class="p-3 bg-indigo-50/60 rounded-2xl border border-indigo-100 text-xs text-indigo-900 flex items-center justify-between">
                 <div>
-                  <span class="font-bold block">Need Cloud Database Backup?</span>
-                  <span class="text-[11px] text-slate-500">Sync with PostgreSQL / Supabase</span>
+                  <span class="font-bold block">Firebase Cloud Firestore</span>
+                  <span class="text-[11px] text-slate-500">Live Synchronized with inventory-c78b4</span>
                 </div>
-                <button onclick="openSupabaseSettingsModal()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition cursor-pointer">
-                  Cloud DB
+                <button onclick="openFirebaseSettingsModal()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs transition cursor-pointer flex items-center space-x-1.5">
+                  <i class="fa-solid fa-fire"></i>
+                  <span>Firebase Config</span>
                 </button>
               </div>
             </div>
@@ -3285,164 +3288,70 @@
   </div>
 
 
-  <!-- 5. SUPABASE / POSTGRESQL SETTINGS MODAL -->
-  <div id="modal-supabase" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+  <!-- 5. FIREBASE CLOUD FIRESTORE SETTINGS MODAL -->
+  <div id="modal-firebase" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
       
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <h3 class="text-base font-black text-slate-900 flex items-center space-x-2 font-heading">
-          <i class="fa-solid fa-database text-emerald-600"></i>
-          <span>PostgreSQL / Supabase Cloud Settings</span>
+          <i class="fa-solid fa-fire text-amber-500"></i>
+          <span>Firebase Cloud Firestore Database</span>
         </h3>
-        <button onclick="closeModal('modal-supabase')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+        <button onclick="closeModal('modal-firebase')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-200 text-xs text-emerald-900 space-y-1">
-        <div class="font-bold flex items-center space-x-1.5">
-          <i class="fa-solid fa-circle-check text-emerald-600"></i>
-          <span>PostgreSQL Database Connectivity</span>
+      <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-2xl border border-amber-200 text-xs text-amber-900 space-y-1.5">
+        <div class="font-bold flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-slate-800">Connected Project: <b class="text-amber-800 font-mono">inventory-c78b4</b></span>
         </div>
-        <p class="text-[11px] text-emerald-700">Enter your Supabase <b>Project URL</b> and <b>Publishable Key (Anon Key)</b> below to sync all records with your live cloud database.</p>
+        <p class="text-[11px] text-slate-600">সকল পণ্য, স্টক, সেলস ইনভয়েস, ট্রান্সফার ও ইউজার অ্যাকাউন্ট সরাসরি Google Cloud Firestore এর সাথে রিয়েলটাইম সিঙ্ক হচ্ছে।</p>
       </div>
 
-      <form onsubmit="handleSaveSupabaseConfig(event)" class="space-y-3 text-xs">
-        <div>
-          <label class="block font-bold text-slate-700 mb-1">Project URL (আপনার সুপাবেস URL) *</label>
-          <input type="text" id="supabase-url" value="https://sosvfzxxlipjihdillca.supabase.co" placeholder="https://sosvfzxxlipjihdillca.supabase.co" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500 font-bold text-slate-800">
-        </div>
-
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block font-bold text-slate-700">Publishable / Anon API Key (সুপাবেস Anon Key) *</label>
-            <a href="https://supabase.com/dashboard/project/sosvfzxxlipjihdillca/settings/api" target="_blank" class="text-[10px] text-emerald-600 font-bold hover:underline flex items-center space-x-1">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i><span>Get Key from Supabase</span>
-            </a>
+      <div class="space-y-3 text-xs">
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 font-mono text-[11px]">
+          <div class="flex justify-between border-b border-slate-200 pb-1.5">
+            <span class="text-slate-500">Project ID:</span>
+            <span class="font-bold text-slate-800">inventory-c78b4</span>
           </div>
-          <textarea id="supabase-key" rows="2" placeholder="Paste your anon public key here" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-[11px] outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500 font-semibold">sb_publishable_kg2r94FaoM354xSZjVoUZQ_gUBoOU0w</textarea>
+          <div class="flex justify-between border-b border-slate-200 pb-1.5">
+            <span class="text-slate-500">Auth Domain:</span>
+            <span class="text-slate-800">inventory-c78b4.firebaseapp.com</span>
+          </div>
+          <div class="flex justify-between border-b border-slate-200 pb-1.5">
+            <span class="text-slate-500">Storage Bucket:</span>
+            <span class="text-slate-800">inventory-c78b4.firebasestorage.app</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500">Realtime Sync Status:</span>
+            <span class="text-emerald-700 font-bold flex items-center space-x-1">
+              <i class="fa-solid fa-circle-check text-emerald-500"></i>
+              <span>Active (Live Listeners)</span>
+            </span>
+          </div>
         </div>
 
-        <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-800 text-xs flex items-center space-x-1.5">
-              <i class="fa-solid fa-terminal text-emerald-600"></i>
-              <span>📋 Step 1: Run SQL in Supabase SQL Editor (এক ক্লিকে কপি করুন):</span>
-            </span>
-            <button type="button" onclick="copySqlSchemaQuery()" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[10px] font-bold shadow-xs cursor-pointer">
-              <i class="fa-solid fa-copy mr-1"></i>Copy SQL
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2">
+          <span class="font-bold text-emerald-900 text-xs block">
+            <i class="fa-solid fa-arrows-rotate text-emerald-600 mr-1"></i>
+            Manual Cloud Actions:
+          </span>
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" onclick="seedAllDataToFirestore()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[11px] shadow-xs flex items-center justify-center space-x-1.5 transition">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Upload Local to Cloud</span>
+            </button>
+            <button type="button" onclick="initFirebaseAndRealtimeSync(); Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Reconnected to Firebase!', showConfirmButton: false, timer: 1500 });" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-[11px] shadow-xs flex items-center justify-center space-x-1.5 transition">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh Connection</span>
             </button>
           </div>
-          <pre id="sql-schema-box" class="bg-slate-900 text-emerald-400 p-3 rounded-xl text-[10px] overflow-x-auto max-h-36 font-mono leading-relaxed">-- Copy & Run in Supabase SQL Editor:
-CREATE TABLE IF NOT EXISTS employees (
-  id BIGSERIAL PRIMARY KEY,
-  employee_id TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  email TEXT,
-  phone TEXT,
-  password TEXT,
-  branch_id BIGINT DEFAULT 1,
-  department TEXT,
-  designation TEXT,
-  role TEXT DEFAULT 'Staff',
-  salary NUMERIC DEFAULT 0,
-  joining_date DATE,
-  status TEXT DEFAULT 'Active',
-  photo_url TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS products (
-  id BIGSERIAL PRIMARY KEY,
-  product_code TEXT UNIQUE NOT NULL,
-  product_name TEXT NOT NULL,
-  category TEXT,
-  purchase_price NUMERIC DEFAULT 0,
-  sale_price NUMERIC NOT NULL,
-  stock INT DEFAULT 0,
-  branch_stocks JSONB DEFAULT '{"1": 0, "2": 0, "3": 0, "4": 0}'::jsonb,
-  image_url TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS sales (
-  id BIGSERIAL PRIMARY KEY,
-  invoice_no TEXT UNIQUE NOT NULL,
-  customer_name TEXT,
-  customer_phone TEXT,
-  branch_id BIGINT DEFAULT 1,
-  branch_name TEXT,
-  salesperson_name TEXT,
-  employee_code TEXT,
-  subtotal NUMERIC DEFAULT 0,
-  discount NUMERIC DEFAULT 0,
-  tax NUMERIC DEFAULT 0,
-  total_amount NUMERIC NOT NULL,
-  payment_method TEXT,
-  items JSONB,
-  cashier_name TEXT,
-  sale_date TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS transfers (
-  id BIGSERIAL PRIMARY KEY,
-  transfer_no TEXT UNIQUE NOT NULL,
-  from_branch_id BIGINT NOT NULL,
-  to_branch_id BIGINT NOT NULL,
-  status TEXT DEFAULT 'In-Transit',
-  items JSONB,
-  dispatched_by TEXT,
-  received_by TEXT,
-  date_dispatched TIMESTAMPTZ DEFAULT NOW(),
-  date_received TIMESTAMPTZ,
-  note TEXT
-);
-
-CREATE TABLE IF NOT EXISTS accounts (
-  id BIGSERIAL PRIMARY KEY,
-  type TEXT NOT NULL,
-  category TEXT,
-  amount NUMERIC NOT NULL,
-  date DATE NOT NULL,
-  payment_method TEXT,
-  note TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS branches (
-  id BIGSERIAL PRIMARY KEY,
-  code TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT DEFAULT 'Branch',
-  manager TEXT,
-  phone TEXT,
-  address TEXT,
-  status TEXT DEFAULT 'Active',
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable public RLS for easy connection:
-ALTER TABLE employees ENABLE ROW LEVEL SECURITY;
-ALTER TABLE products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transfers ENABLE ROW LEVEL SECURITY;
-ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE branches ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow all access to employees" ON employees FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access to products" ON products FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access to sales" ON sales FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access to transfers" ON transfers FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access to accounts" ON accounts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WITH CHECK (true);</pre>
         </div>
 
-        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
-          <button type="button" onclick="closeModal('modal-supabase')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm flex items-center space-x-1.5">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span>Save & Connect</span>
-          </button>
+        <div class="pt-3 border-t border-slate-100 flex justify-end">
+          <button type="button" onclick="closeModal('modal-firebase')" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition">Close</button>
         </div>
-      </form>
+      </div>
 
     </div>
   </div>
@@ -3712,11 +3621,13 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
 
 
   <!-- ============================================================ -->
-  <!-- JAVASCRIPT APP LOGIC & SUPABASE INTEGRATION -->
+  <!-- JAVASCRIPT APP LOGIC & FIREBASE CLOUD FIRESTORE INTEGRATION -->
   <!-- ============================================================ -->
   <script>
-    // --- Application State ---
-    let supabaseClient = null;
+    // --- Application State & Firebase ---
+    let firebaseApp = null;
+    let firebaseDb = null;
+    let firebaseUnsubscribers = [];
     let currentUser = null;
     let posCart = [];
 
@@ -4000,7 +3911,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
 
     // --- Init App on Page Load ---
     window.addEventListener('DOMContentLoaded', () => {
-      loadStoredCredentialsAndSupabase();
+      initFirebaseAndRealtimeSync();
       populateBranchDropdowns();
       applyRolePermissionsToUI();
       updateTransferBadges();
@@ -4153,209 +4064,307 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       }
     }
 
-    // --- Supabase Config & Initialization ---
-    const DEFAULT_SUPABASE_URL = 'https://sosvfzxxlipjihdillca.supabase.co';
-    const DEFAULT_SUPABASE_KEY = 'sb_publishable_kg2r94FaoM354xSZjVoUZQ_gUBoOU0w';
+    // --- Firebase Cloud Firestore Config & Initialization ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyAC-b9Cf54T0-kP4j4CLSht6vRpe07_ojE",
+      authDomain: "inventory-c78b4.firebaseapp.com",
+      projectId: "inventory-c78b4",
+      storageBucket: "inventory-c78b4.firebasestorage.app",
+      messagingSenderId: "368017395474",
+      appId: "1:368017395474:web:12b3a88f59cc651e6eedcb",
+      measurementId: "G-KDXNEYQTN5"
+    };
 
-    function loadStoredCredentialsAndSupabase() {
-      const savedUrl = localStorage.getItem('apex_supabase_url') || DEFAULT_SUPABASE_URL;
-      const savedKey = localStorage.getItem('apex_supabase_key') || DEFAULT_SUPABASE_KEY;
-
-      if (document.getElementById('supabase-url')) document.getElementById('supabase-url').value = savedUrl;
-      if (document.getElementById('supabase-key')) document.getElementById('supabase-key').value = savedKey;
-
-      if (savedUrl && savedKey && window.supabase) {
-        try {
-          supabaseClient = window.supabase.createClient(savedUrl, savedKey);
-          updateDbStatusBadge(true, 'PostgreSQL: Live Connected');
-          fetchCloudDataRealtime();
-        } catch (err) {
-          console.warn('Supabase init error:', err);
-          updateDbStatusBadge(false, 'Local DB (Ready to Connect)');
+    function initFirebaseAndRealtimeSync() {
+      try {
+        if (!firebase.apps.length) {
+          firebaseApp = firebase.initializeApp(firebaseConfig);
+        } else {
+          firebaseApp = firebase.app();
         }
-      } else {
-        updateDbStatusBadge(false, 'Local DB (Ready to Connect)');
+        firebaseDb = firebase.firestore();
+        updateDbStatusBadge(true, 'Firebase: Live Connected');
+        setupRealtimeFirestoreSync();
+      } catch (err) {
+        console.warn('Firebase initialization error:', err);
+        updateDbStatusBadge(false, 'Local Offline Mode');
       }
+    }
+
+    function openFirebaseSettingsModal() {
+      openModal('modal-firebase');
     }
 
     function updateDbStatusBadge(isConnected, text) {
       const dot = document.getElementById('header-db-dot');
       const label = document.getElementById('header-db-label');
+      const loginDot = document.getElementById('login-db-dot');
       const loginStatus = document.getElementById('login-db-status');
 
       if (dot) dot.className = isConnected ? 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' : 'w-2 h-2 rounded-full bg-amber-500';
+      if (loginDot) loginDot.className = isConnected ? 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse' : 'w-2 h-2 rounded-full bg-amber-500';
       if (label) label.innerText = text;
       if (loginStatus) loginStatus.innerText = text;
     }
 
-    async function fetchCloudDataRealtime() {
-      if (!supabaseClient) return;
+    async function setupRealtimeFirestoreSync() {
+      if (!firebaseDb) return;
 
       try {
-        const { data: prods, error: pErr } = await supabaseClient.from('products').select('*');
-        if (!pErr && prods) {
-          if (prods.length > 0) {
-            productsData = prods;
+        // Clear previous listeners if any
+        firebaseUnsubscribers.forEach(unsub => { if (typeof unsub === 'function') unsub(); });
+        firebaseUnsubscribers = [];
+
+        // 1. PRODUCTS REALTIME SYNC
+        const unsubProducts = firebaseDb.collection('products').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            productsData = list;
             localStorage.setItem('apex_products', JSON.stringify(productsData));
-          } else if (localStorage.getItem('apex_products_seeded') !== 'true') {
-            localStorage.setItem('apex_products_seeded', 'true');
-            await supabaseClient.from('products').upsert(productsData.map(p => ({
-              id: p.id,
-              product_code: p.product_code,
-              product_name: p.product_name,
-              category: p.category,
-              purchase_price: p.purchase_price,
-              sale_price: p.sale_price,
-              stock: p.stock,
-              branch_stocks: p.branch_stocks || {},
-              image_url: p.image_url
-            })));
-          }
-        }
-
-        const { data: emps, error: eErr } = await supabaseClient.from('employees').select('*');
-        if (!eErr && emps) {
-          if (emps.length > 0) {
-            employeesData = emps;
-            localStorage.setItem('apex_employees', JSON.stringify(employeesData));
-          } else if (localStorage.getItem('apex_employees_seeded') !== 'true') {
-            localStorage.setItem('apex_employees_seeded', 'true');
-            await supabaseClient.from('employees').upsert(employeesData.map(e => ({
-              id: e.id,
-              employee_id: e.employee_id,
-              name: e.name,
-              email: e.email,
-              phone: e.phone,
-              password: e.password,
-              branch_id: e.branch_id,
-              department: e.department,
-              designation: e.designation,
-              role: e.role,
-              salary: e.salary,
-              joining_date: e.joining_date,
-              status: e.status,
-              photo_url: e.photo_url
-            })));
-          }
-        }
-
-        const { data: sls, error: sErr } = await supabaseClient.from('sales').select('*').order('id', { ascending: false });
-        if (!sErr && sls) {
-          salesData = sls;
-          localStorage.setItem('apex_sales', JSON.stringify(salesData));
-        }
-
-        const { data: trfs, error: trfErr } = await supabaseClient.from('transfers').select('*').order('id', { ascending: false });
-        if (!trfErr && trfs) {
-          transfersData = trfs;
-          localStorage.setItem('apex_transfers', JSON.stringify(transfersData));
-        }
-
-        const { data: txs, error: txErr } = await supabaseClient.from('accounts').select('*').order('id', { ascending: false });
-        if (!txErr && txs) {
-          accountsData = txs;
-          localStorage.setItem('apex_accounts', JSON.stringify(accountsData));
-        }
-
-        const { data: brs, error: brErr } = await supabaseClient.from('branches').select('*');
-        if (!brErr && brs && brs.length > 0) {
-          branchesData = brs;
-          localStorage.setItem('apex_branches', JSON.stringify(branchesData));
-        }
-
-        renderDashboard();
-        renderPosProducts();
-        renderProductsTable();
-        renderEmployeesTable();
-        renderSalesTable();
-        renderAccountsTable();
-        renderTransfersTable();
-        renderBranchesTable();
-        renderSystemUsersTable();
-        renderInventoryAuditTable();
-        updateTransferBadges();
-        populateCategoryFilters();
-        populatePosSalesEmployees();
-        populateBranchDropdowns();
-
-        // Subscribe to live cloud realtime changes
-        supabaseClient.channel('realtime-pos-sync')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'sales' }, payload => {
-            if (payload.eventType === 'INSERT' && !salesData.some(s => s.id === payload.new.id)) {
-              salesData.unshift(payload.new);
-              renderDashboard();
-              renderSalesTable();
-              if (document.getElementById('sec-reports') && !document.getElementById('sec-reports').classList.contains('hidden')) {
-                applyReportFilters();
-              }
-            }
-          })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-            const idx = productsData.findIndex(p => p.id === payload.new.id);
-            if (idx >= 0) productsData[idx] = payload.new;
-            else productsData.push(payload.new);
             renderPosProducts();
             renderProductsTable();
-          })
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'transfers' }, payload => {
-            const idx = transfersData.findIndex(t => t.id === payload.new.id);
-            if (idx >= 0) transfersData[idx] = payload.new;
-            else transfersData.unshift(payload.new);
+            renderInventoryAuditTable();
+            renderDashboard();
+            populateCategoryFilters();
+          } else if (localStorage.getItem('apex_products_seeded') !== 'true') {
+            localStorage.setItem('apex_products_seeded', 'true');
+            seedAllDataToFirestore();
+          }
+        }, err => console.warn('Firestore Products sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubProducts);
+
+        // 2. SALES REALTIME SYNC
+        const unsubSales = firebaseDb.collection('sales').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            // Sort by date desc
+            list.sort((a, b) => new Date(b.sale_date || 0) - new Date(a.sale_date || 0));
+            salesData = list;
+            localStorage.setItem('apex_sales', JSON.stringify(salesData));
+            renderDashboard();
+            renderSalesTable();
+            if (document.getElementById('sec-reports') && !document.getElementById('sec-reports').classList.contains('hidden')) {
+              applyReportFilters();
+            }
+          }
+        }, err => console.warn('Firestore Sales sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubSales);
+
+        // 3. EMPLOYEES REALTIME SYNC
+        const unsubEmployees = firebaseDb.collection('employees').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            employeesData = list;
+            localStorage.setItem('apex_employees', JSON.stringify(employeesData));
+            renderEmployeesTable();
+            renderSystemUsersTable();
+            populatePosSalesEmployees();
+          }
+        }, err => console.warn('Firestore Employees sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubEmployees);
+
+        // 4. TRANSFERS REALTIME SYNC
+        const unsubTransfers = firebaseDb.collection('transfers').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            list.sort((a, b) => new Date(b.date_dispatched || 0) - new Date(a.date_dispatched || 0));
+            transfersData = list;
+            localStorage.setItem('apex_transfers', JSON.stringify(transfersData));
             renderTransfersTable();
             updateTransferBadges();
-          })
-          .subscribe();
+          }
+        }, err => console.warn('Firestore Transfers sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubTransfers);
+
+        // 5. ACCOUNTS REALTIME SYNC
+        const unsubAccounts = firebaseDb.collection('accounts').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            accountsData = list;
+            localStorage.setItem('apex_accounts', JSON.stringify(accountsData));
+            renderAccountsTable();
+            renderDashboard();
+          }
+        }, err => console.warn('Firestore Accounts sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubAccounts);
+
+        // 6. BRANCHES REALTIME SYNC
+        const unsubBranches = firebaseDb.collection('branches').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            branchesData = list;
+            localStorage.setItem('apex_branches', JSON.stringify(branchesData));
+            renderBranchesTable();
+            populateBranchDropdowns();
+          }
+        }, err => console.warn('Firestore Branches sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubBranches);
 
       } catch (err) {
-        console.warn('Cloud sync note:', err.message);
+        console.warn('Realtime sync setup exception:', err);
       }
     }
 
-    async function handleSaveSupabaseConfig(e) {
-      e.preventDefault();
-      const url = document.getElementById('supabase-url').value.trim() || DEFAULT_SUPABASE_URL;
-      const key = document.getElementById('supabase-key').value.trim();
+    // Helper functions for direct Firestore DB operations
+    async function dbSyncProduct(product) {
+      if (!firebaseDb || !product) return;
+      try {
+        const docId = String(product.id || Date.now());
+        await firebaseDb.collection('products').doc(docId).set(product, { merge: true });
+      } catch (e) { console.warn('Product Firestore sync err:', e); }
+    }
 
-      if (!key) {
-        Swal.fire('API Key Required', 'অনুগ্রহ করে আপনার Supabase এর <b>Anon Public Key</b> টি পেস্ট করুন।', 'warning');
+    async function dbDeleteProduct(productId) {
+      if (!firebaseDb || !productId) return;
+      try {
+        await firebaseDb.collection('products').doc(String(productId)).delete();
+      } catch (e) { console.warn('Product Firestore delete err:', e); }
+    }
+
+    async function dbSyncSale(sale) {
+      if (!firebaseDb || !sale) return;
+      try {
+        const docId = String(sale.invoice_no || sale.id || Date.now());
+        await firebaseDb.collection('sales').doc(docId).set(sale, { merge: true });
+      } catch (e) { console.warn('Sale Firestore sync err:', e); }
+    }
+
+    async function dbDeleteSale(invoiceNo) {
+      if (!firebaseDb || !invoiceNo) return;
+      try {
+        await firebaseDb.collection('sales').doc(String(invoiceNo)).delete();
+      } catch (e) { console.warn('Sale Firestore delete err:', e); }
+    }
+
+    async function dbSyncTransfer(transfer) {
+      if (!firebaseDb || !transfer) return;
+      try {
+        const docId = String(transfer.transfer_no || transfer.id || Date.now());
+        await firebaseDb.collection('transfers').doc(docId).set(transfer, { merge: true });
+      } catch (e) { console.warn('Transfer Firestore sync err:', e); }
+    }
+
+    async function dbSyncAccount(account) {
+      if (!firebaseDb || !account) return;
+      try {
+        const docId = String(account.id || Date.now());
+        await firebaseDb.collection('accounts').doc(docId).set(account, { merge: true });
+      } catch (e) { console.warn('Account Firestore sync err:', e); }
+    }
+
+    async function dbDeleteAccount(accountId) {
+      if (!firebaseDb || !accountId) return;
+      try {
+        await firebaseDb.collection('accounts').doc(String(accountId)).delete();
+      } catch (e) { console.warn('Account Firestore delete err:', e); }
+    }
+
+    async function dbSyncEmployee(employee) {
+      if (!firebaseDb || !employee) return;
+      try {
+        const docId = String(employee.id || Date.now());
+        await firebaseDb.collection('employees').doc(docId).set(employee, { merge: true });
+      } catch (e) { console.warn('Employee Firestore sync err:', e); }
+    }
+
+    async function dbDeleteEmployee(employeeId) {
+      if (!firebaseDb || !employeeId) return;
+      try {
+        await firebaseDb.collection('employees').doc(String(employeeId)).delete();
+      } catch (e) { console.warn('Employee Firestore delete err:', e); }
+    }
+
+    async function dbSyncBranch(branch) {
+      if (!firebaseDb || !branch) return;
+      try {
+        const docId = String(branch.id || Date.now());
+        await firebaseDb.collection('branches').doc(docId).set(branch, { merge: true });
+      } catch (e) { console.warn('Branch Firestore sync err:', e); }
+    }
+
+    async function dbDeleteBranch(branchId) {
+      if (!firebaseDb || !branchId) return;
+      try {
+        await firebaseDb.collection('branches').doc(String(branchId)).delete();
+      } catch (e) { console.warn('Branch Firestore delete err:', e); }
+    }
+
+    async function seedAllDataToFirestore() {
+      if (!firebaseDb) {
+        Swal.fire('Notice', 'Firebase is not initialized yet.', 'warning');
         return;
       }
 
-      localStorage.setItem('apex_supabase_url', url);
-      localStorage.setItem('apex_supabase_key', key);
+      Swal.fire({
+        title: 'Uploading to Firebase...',
+        html: 'Local products, employees & branch data are being uploaded to Cloud Firestore.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
 
       try {
-        supabaseClient = window.supabase.createClient(url, key);
-
-        // Test connection by reading products
-        const { error } = await supabaseClient.from('products').select('id').limit(1);
-        if (error) throw error;
-
-        updateDbStatusBadge(true, 'PostgreSQL: Live Connected');
-        closeModal('modal-supabase');
+        // Upload Branches
+        for (const b of branchesData) {
+          await firebaseDb.collection('branches').doc(String(b.id)).set(b, { merge: true });
+        }
+        // Upload Products
+        for (const p of productsData) {
+          await firebaseDb.collection('products').doc(String(p.id)).set(p, { merge: true });
+        }
+        // Upload Employees
+        for (const e of employeesData) {
+          await firebaseDb.collection('employees').doc(String(e.id)).set(e, { merge: true });
+        }
+        // Upload Transfers
+        for (const t of transfersData) {
+          await firebaseDb.collection('transfers').doc(String(t.transfer_no || t.id)).set(t, { merge: true });
+        }
+        // Upload Accounts
+        for (const a of accountsData) {
+          await firebaseDb.collection('accounts').doc(String(a.id)).set(a, { merge: true });
+        }
 
         Swal.fire({
           icon: 'success',
-          title: 'Database Connected Successfully!',
-          html: `<p class="text-xs">আপনার সুপাবেস ক্লাউড ডাটাবেস <b>${url}</b> সফলভাবে যুক্ত হয়েছে। এখন সকল সেলস ও স্টক সরাসরি ক্লাউডে সেভ হবে।</p>`,
-          confirmButtonText: 'Great!'
+          title: 'Cloud Upload Complete!',
+          text: 'সকল ডেটা সফলভাবে Firebase Cloud Firestore এ আপলোড হয়েছে।',
+          timer: 2000,
+          showConfirmButton: false
         });
-
-        fetchCloudDataRealtime();
       } catch (err) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Connection Notice',
-          html: `<p class="text-xs">Supabase এর সাথে যুক্ত হতে সমস্যা হয়েছে: <b>${err.message}</b></p><p class="text-[11px] text-slate-500 mt-2">টিপস: আপনি কি Supabase এর <b>SQL Editor</b> এ টেবিল তৈরির কোডটি Run করেছেন?</p>`
-        });
+        Swal.fire('Upload Notice', `Cloud upload error: ${err.message}`, 'error');
       }
-    }
-
-    function copySqlSchemaQuery() {
-      const sql = document.getElementById('sql-schema-box').innerText;
-      navigator.clipboard.writeText(sql).then(() => {
-        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'SQL Schema copied to clipboard!', showConfirmButton: false, timer: 2000 });
-      });
     }
 
     // --- Authentication ---
@@ -4795,14 +4804,8 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
 
       localStorage.setItem('apex_branches', JSON.stringify(branchesData));
 
-      // Supabase sync if connected
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('branches').upsert([{ id: targetBranchId, ...branchPayload }]);
-        } catch (err) {
-          console.warn('Supabase branch sync notice:', err.message);
-        }
-      }
+      // Firestore sync
+      dbSyncBranch({ id: targetBranchId, ...branchPayload });
 
       closeModal('modal-branch');
       populateBranchDropdowns();
@@ -4846,9 +4849,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         branchesData = branchesData.filter(b => b.id != id);
         localStorage.setItem('apex_branches', JSON.stringify(branchesData));
 
-        if (supabaseClient) {
-          supabaseClient.from('branches').delete().eq('id', id).then();
-        }
+        dbDeleteBranch(id);
 
         populateBranchDropdowns();
         renderBranchesTable();
@@ -6062,37 +6063,12 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         if (prod) {
           const currentBStock = getProductBranchStock(prod, effectiveBranchId);
           setProductBranchStock(prod, effectiveBranchId, Math.max(0, currentBStock - cartItem.qty));
-          if (supabaseClient) {
-            supabaseClient.from('products').update({ stock: prod.stock, branch_stocks: prod.branch_stocks }).eq('id', prod.id).then();
-          }
+          dbSyncProduct(prod);
         }
       });
 
       salesData.unshift(saleRecord);
-
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('sales').insert([{
-            invoice_no: saleRecord.invoice_no,
-            customer_name: saleRecord.customer_name,
-            customer_phone: saleRecord.customer_phone,
-            branch_id: saleRecord.branch_id,
-            branch_name: saleRecord.branch_name,
-            salesperson_name: saleRecord.salesperson_name,
-            employee_code: saleRecord.employee_code,
-            subtotal: saleRecord.subtotal,
-            discount: saleRecord.discount,
-            tax: saleRecord.tax,
-            total_amount: saleRecord.total_amount,
-            payment_method: saleRecord.payment_method,
-            sale_date: saleRecord.sale_date,
-            items: saleRecord.items,
-            cashier_name: saleRecord.cashier_name
-          }]);
-        } catch (err) {
-          console.warn('Supabase sale insert note:', err);
-        }
-      }
+      dbSyncSale(saleRecord);
 
       previewInvoiceReceipt(saleRecord.invoice_no);
 
@@ -6437,17 +6413,14 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (id) {
         // Update existing
         const idx = productsData.findIndex(p => p.id == id);
-        if (idx !== -1) productsData[idx] = { id: Number(id), ...productPayload };
-        if (supabaseClient) {
-          await supabaseClient.from('products').update(productPayload).eq('id', id);
-        }
+        const updated = { id: Number(id), ...productPayload };
+        if (idx !== -1) productsData[idx] = updated;
+        dbSyncProduct(updated);
       } else {
         // Add new
         const newProduct = { id: Date.now(), ...productPayload };
         productsData.push(newProduct);
-        if (supabaseClient) {
-          await supabaseClient.from('products').insert([productPayload]);
-        }
+        dbSyncProduct(newProduct);
       }
 
       localStorage.setItem('apex_products', JSON.stringify(productsData));
@@ -6473,13 +6446,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (res.isConfirmed) {
         productsData = productsData.filter(p => p.id !== id);
         localStorage.setItem('apex_products', JSON.stringify(productsData));
-        if (supabaseClient) {
-          try {
-            await supabaseClient.from('products').delete().eq('id', id);
-          } catch (err) {
-            console.warn('Supabase delete product note:', err);
-          }
-        }
+        dbDeleteProduct(id);
         renderProductsTable();
         renderPosProducts();
         renderDashboard();
@@ -7082,16 +7049,13 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
 
       if (id) {
         const idx = employeesData.findIndex(e => e.id == id);
-        if (idx !== -1) employeesData[idx] = { id: Number(id), ...employeePayload };
-        if (supabaseClient) {
-          await supabaseClient.from('employees').update(employeePayload).eq('id', id);
-        }
+        const updated = { id: Number(id), ...employeePayload };
+        if (idx !== -1) employeesData[idx] = updated;
+        dbSyncEmployee(updated);
       } else {
         const newEmp = { id: Date.now(), ...employeePayload };
         employeesData.push(newEmp);
-        if (supabaseClient) {
-          await supabaseClient.from('employees').insert([employeePayload]);
-        }
+        dbSyncEmployee(newEmp);
       }
 
       localStorage.setItem('apex_employees', JSON.stringify(employeesData));
@@ -7117,13 +7081,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (res.isConfirmed) {
         employeesData = employeesData.filter(e => e.id !== id);
         localStorage.setItem('apex_employees', JSON.stringify(employeesData));
-        if (supabaseClient) {
-          try {
-            await supabaseClient.from('employees').delete().eq('id', id);
-          } catch (err) {
-            console.warn('Supabase delete employee note:', err);
-          }
-        }
+        dbDeleteEmployee(id);
         populatePosSalesEmployees();
         renderEmployeesTable();
         renderDashboard();
@@ -7224,14 +7182,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
               const bId = sale.branch_id || 1;
               const currentBStock = getProductBranchStock(prod, bId);
               setProductBranchStock(prod, bId, currentBStock + (Number(item.qty) || 1));
-              if (supabaseClient) {
-                try {
-                  supabaseClient.from('products').update({
-                    stock: prod.stock,
-                    branch_stocks: prod.branch_stocks
-                  }).eq('id', prod.id).then();
-                } catch (e) {}
-              }
+              dbSyncProduct(prod);
             }
           });
         }
@@ -7241,14 +7192,8 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         localStorage.setItem('apex_sales', JSON.stringify(salesData));
         localStorage.setItem('apex_products', JSON.stringify(productsData));
 
-        // Delete from Supabase
-        if (supabaseClient) {
-          try {
-            await supabaseClient.from('sales').delete().eq('invoice_no', invoiceNo);
-          } catch (err) {
-            console.warn('Supabase delete sale error:', err);
-          }
-        }
+        // Delete from Firestore
+        dbDeleteSale(invoiceNo);
 
         renderSalesTable();
         renderProductsTable();
@@ -7327,13 +7272,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (res.isConfirmed) {
         accountsData = accountsData.filter(t => t.id !== id);
         localStorage.setItem('apex_accounts', JSON.stringify(accountsData));
-        if (supabaseClient) {
-          try {
-            await supabaseClient.from('accounts').delete().eq('id', id);
-          } catch (err) {
-            console.warn('Supabase delete account note:', err);
-          }
-        }
+        dbDeleteAccount(id);
         renderAccountsTable();
         renderDashboard();
         Swal.fire('Deleted!', 'Transaction entry removed', 'success');
@@ -7373,13 +7312,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       accountsData.unshift(newTx);
       localStorage.setItem('apex_accounts', JSON.stringify(accountsData));
 
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('accounts').insert([txPayload]);
-        } catch (err) {
-          console.warn('Supabase account insert note:', err);
-        }
-      }
+      dbSyncAccount(newTx);
 
       closeModal('modal-transaction');
       renderAccountsTable();
@@ -7704,9 +7637,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
           const prod = productsData.find(p => p.id == id);
           if (prod) {
             prod.stock = inventoryAuditState.scannedCounts[id];
-            if (supabaseClient) {
-              supabaseClient.from('products').update({ stock: prod.stock }).eq('id', prod.id).then();
-            }
+            dbSyncProduct(prod);
           }
         });
 
@@ -7721,11 +7652,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
             payment_method: 'Internal Adjustment'
           };
           accountsData.unshift(auditExpense);
-          if (supabaseClient) {
-            try {
-              await supabaseClient.from('transactions').insert([auditExpense]);
-            } catch (err) {}
-          }
+          dbSyncAccount(auditExpense);
         }
 
         renderDashboard();
@@ -8424,21 +8351,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       };
 
       transfersData.unshift(newTransfer);
-
-      if (supabaseClient) {
-        supabaseClient.from('transfers').insert([{
-          transfer_no: newTransfer.transfer_no,
-          from_branch_id: newTransfer.from_branch_id,
-          to_branch_id: newTransfer.to_branch_id,
-          status: newTransfer.status,
-          items: newTransfer.items,
-          dispatched_by: newTransfer.dispatched_by,
-          received_by: newTransfer.received_by,
-          date_dispatched: newTransfer.date_dispatched,
-          date_received: newTransfer.date_received,
-          note: newTransfer.note
-        }]).then();
-      }
+      dbSyncTransfer(newTransfer);
 
       closeModal('modal-transfer-create');
       renderTransfersTable();
@@ -8493,9 +8406,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
             const destStock = getProductBranchStock(prod, trf.to_branch_id);
             setProductBranchStock(prod, trf.to_branch_id, destStock + item.qty);
 
-            if (supabaseClient) {
-              supabaseClient.from('products').update({ stock: prod.stock, branch_stocks: prod.branch_stocks }).eq('id', prod.id).then();
-            }
+            dbSyncProduct(prod);
           }
         });
 
@@ -8503,13 +8414,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         trf.received_by = currentUser ? `${currentUser.name} (${toName.split('(')[0].trim()})` : 'Branch Staff';
         trf.date_received = new Date().toISOString();
 
-        if (supabaseClient) {
-          supabaseClient.from('transfers').update({
-            status: 'Received',
-            received_by: trf.received_by,
-            date_received: trf.date_received
-          }).eq('transfer_no', trf.transfer_no).then();
-        }
+        dbSyncTransfer(trf);
 
         renderTransfersTable();
         updateTransferBadges();
@@ -10049,9 +9954,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         if (retProd) {
           const curRetBStock = getProductBranchStock(retProd, effectiveBranchId);
           setProductBranchStock(retProd, effectiveBranchId, curRetBStock + r.returnQty);
-          if (supabaseClient) {
-            supabaseClient.from('products').update({ stock: retProd.stock, branch_stocks: retProd.branch_stocks }).eq('id', retProd.id).then();
-          }
+          dbSyncProduct(retProd);
         }
       });
 
@@ -10060,9 +9963,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (newProd) {
         const curNewBStock = getProductBranchStock(newProd, effectiveBranchId);
         setProductBranchStock(newProd, effectiveBranchId, Math.max(0, curNewBStock - newQty));
-        if (supabaseClient) {
-          supabaseClient.from('products').update({ stock: newProd.stock, branch_stocks: newProd.branch_stocks }).eq('id', newProd.id).then();
-        }
+        dbSyncProduct(newProd);
       }
 
       // 2. Generate Exchange Sales Invoice Record
@@ -10119,31 +10020,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       };
 
       salesData.unshift(exchangeSaleRecord);
-
-      // 3. Supabase Cloud Sync
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from('sales').insert([{
-            invoice_no: exchangeSaleRecord.invoice_no,
-            customer_name: exchangeSaleRecord.customer_name,
-            customer_phone: exchangeSaleRecord.customer_phone,
-            branch_id: exchangeSaleRecord.branch_id,
-            branch_name: exchangeSaleRecord.branch_name,
-            salesperson_name: exchangeSaleRecord.salesperson_name,
-            employee_code: exchangeSaleRecord.employee_code,
-            subtotal: exchangeSaleRecord.subtotal,
-            discount: exchangeSaleRecord.discount,
-            tax: exchangeSaleRecord.tax,
-            total_amount: exchangeSaleRecord.total_amount,
-            payment_method: exchangeSaleRecord.payment_method,
-            sale_date: exchangeSaleRecord.sale_date,
-            items: exchangeSaleRecord.items,
-            cashier_name: exchangeSaleRecord.cashier_name
-          }]);
-        } catch (err) {
-          console.warn('Supabase exchange sale insert error:', err);
-        }
-      }
+      dbSyncSale(exchangeSaleRecord);
 
       // 4. Record difference payment in Accounts Ledger if collected cash
       if (differenceToPay > 0) {
@@ -10157,9 +10034,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
           note: `Exchange Invoice: ${exchangeInvoiceNo} (Ref: ${exchangeSelectedInvoice.invoice_no})`
         };
         accountsData.unshift(txnRecord);
-        if (supabaseClient) {
-          supabaseClient.from('accounts').insert([txnRecord]).then();
-        }
+        dbSyncAccount(txnRecord);
       }
 
       closeModal('modal-product-exchange');
@@ -10225,7 +10100,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       if (modal) modal.classList.add('hidden');
     }
 
-    function openSupabaseSettingsModal() {
+    function openFirebaseSettingsModal() {
       if (!currentUser || currentUser.role !== 'Admin') {
         Swal.fire({
           icon: 'error',
@@ -10235,7 +10110,7 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
         });
         return;
       }
-      openModal('modal-supabase');
+      openModal('modal-firebase');
     }
 
     // ============================================================
@@ -10312,11 +10187,11 @@ CREATE POLICY "Allow all access to branches" ON branches FOR ALL USING (true) WI
       localStorage.setItem('rtr_store_profile', JSON.stringify(storeProfile));
       localStorage.setItem('apex_store_profile', JSON.stringify(storeProfile));
 
-      if (supabaseClient) {
+      if (firebaseDb) {
         try {
-          supabaseClient.from('settings').upsert([{ key: 'store_profile', value: storeProfile }]).then();
+          firebaseDb.collection('settings').doc('store_profile').set(storeProfile, { merge: true });
         } catch (err) {
-          console.warn('Supabase settings sync error:', err);
+          console.warn('Firestore settings sync notice:', err);
         }
       }
 
