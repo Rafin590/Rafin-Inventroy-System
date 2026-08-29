@@ -33,6 +33,9 @@
         <button onclick="switchTab('products')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
           <i class="fa-solid fa-box-open w-5"></i> Products & Stock
         </button>
+        <button onclick="switchTab('saleshistory')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-receipt w-5"></i> Sales History
+        </button>
         <button onclick="switchTab('purchase')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
           <i class="fa-solid fa-truck-ramp-box w-5"></i> Stock In / Purchase
         </button>
@@ -48,7 +51,7 @@
       </nav>
     </div>
     <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-      v2.0 Enterprise Release
+      v2.2 Editable Release
     </div>
   </aside>
 
@@ -166,19 +169,23 @@
         </div>
       </section>
 
-      <!-- 3. PRODUCTS & STOCK -->
+      <!-- 3. PRODUCTS & STOCK (WITH EDIT & DELETE) -->
       <section id="tab-products" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-          <h3 class="font-bold text-gray-800 mb-4 text-sm">Add New Product</h3>
+          <h3 class="font-bold text-gray-800 mb-4 text-sm" id="prodFormTitle">Add New Product</h3>
           <form id="productForm" onsubmit="saveProduct(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+            <input type="hidden" id="pEditIndex" value="-1">
             <input type="text" id="pSKU" placeholder="SKU (e.g. TS-001)" required class="border p-2 rounded">
             <input type="text" id="pName" placeholder="Product Name" required class="border p-2 rounded">
             <input type="text" id="pCategory" placeholder="Category" class="border p-2 rounded">
             <input type="number" id="pBuyPrice" placeholder="Purchase Price (৳)" required class="border p-2 rounded">
             <input type="number" id="pSalePrice" placeholder="Sale Price (৳)" required class="border p-2 rounded">
-            <input type="number" id="pStock" placeholder="Initial Stock" required class="border p-2 rounded">
+            <input type="number" id="pStock" placeholder="Current Stock" required class="border p-2 rounded">
             <input type="number" id="pMinStock" placeholder="Min Stock Alert" required class="border p-2 rounded">
-            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2">Save Product</button>
+            <div class="flex gap-2">
+              <button type="submit" id="pSubmitBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2">Save Product</button>
+              <button type="button" id="pCancelBtn" onclick="resetProductForm()" class="hidden bg-gray-400 hover:bg-gray-500 text-white font-semibold rounded p-2">Cancel</button>
+            </div>
           </form>
         </div>
 
@@ -193,6 +200,7 @@
                 <th class="p-3">Sale Price</th>
                 <th class="p-3">Stock</th>
                 <th class="p-3">Total Value</th>
+                <th class="p-3 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="productTableBody" class="divide-y"></tbody>
@@ -200,7 +208,29 @@
         </div>
       </section>
 
-      <!-- 4. PURCHASE / STOCK IN -->
+      <!-- 4. SALES HISTORY (WITH CANCEL / DELETE) -->
+      <section id="tab-saleshistory" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto p-5">
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Recent Sales Invoices</h3>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-600 border-b">
+              <tr>
+                <th class="p-3">Invoice</th>
+                <th class="p-3">Date</th>
+                <th class="p-3">Items</th>
+                <th class="p-3">Total</th>
+                <th class="p-3">Paid</th>
+                <th class="p-3">Due</th>
+                <th class="p-3">Method</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="salesHistoryTableBody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. PURCHASE / STOCK IN -->
       <section id="tab-purchase" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock In / Supplier Purchase</h3>
@@ -219,7 +249,7 @@
         </div>
       </section>
 
-      <!-- 5. STOCK OUT / ADJUST -->
+      <!-- 6. STOCK OUT / ADJUST -->
       <section id="tab-stockout" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock Out Entry (Damage / Office / Sample)</h3>
@@ -238,7 +268,7 @@
         </div>
       </section>
 
-      <!-- 6. EXPENSE ENTRY -->
+      <!-- 7. EXPENSE ENTRY (WITH DELETE) -->
       <section id="tab-expense" class="hidden space-y-4">
         <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
           <h3 class="font-bold text-gray-800 mb-4 text-sm">Add Operational Expense</h3>
@@ -263,16 +293,31 @@
             <button type="submit" class="bg-gray-800 text-white font-semibold rounded p-2 hover:bg-black">Save Expense</button>
           </form>
         </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto p-5">
+          <h4 class="font-bold text-gray-800 mb-3 text-sm">Expense Log</h4>
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-600 border-b">
+              <tr>
+                <th class="p-3">Category</th>
+                <th class="p-3">Description</th>
+                <th class="p-3">Account</th>
+                <th class="p-3">Amount</th>
+                <th class="p-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="expenseTableBody" class="divide-y"></tbody>
+          </table>
+        </div>
       </section>
 
-      <!-- 7. P&L & CASH FLOW -->
+      <!-- 8. P&L & CASH FLOW -->
       <section id="tab-reports" class="hidden space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- P&L Statement -->
           <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-3">
             <h3 class="font-bold text-gray-800 border-b pb-2 flex justify-between">
               <span>Profit & Loss Statement</span>
-              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Real-Time</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Live</span>
             </h3>
             <div class="space-y-2 text-sm">
               <div class="flex justify-between"><span>Sales Revenue:</span><span id="plSales" class="font-bold">৳0</span></div>
@@ -285,7 +330,6 @@
             </div>
           </div>
 
-          <!-- Cash Breakdown -->
           <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-3">
             <h3 class="font-bold text-gray-800 border-b pb-2">Cash & Accounts Breakdown</h3>
             <div class="space-y-2 text-sm">
@@ -303,7 +347,7 @@
     </div>
   </main>
 
-  <!-- Printable Invoice (Thermal Print Format) -->
+  <!-- Printable Invoice (Thermal Print) -->
   <div id="printReceipt" class="hidden p-4 text-xs font-mono max-w-xs mx-auto border bg-white">
     <div class="text-center mb-3">
       <h2 class="font-black text-sm">ENTERPRISE POS</h2>
@@ -322,7 +366,7 @@
   </div>
 
   <script>
-    // System Local Database Initialization
+    // Storage & In-Memory Data Management
     let products = JSON.parse(localStorage.getItem('erp_products')) || [
       { sku: 'TS-001', name: 'Black T-Shirt', category: 'Clothing', buyPrice: 450, salePrice: 650, stock: 40, minStock: 10 },
       { sku: 'PN-002', name: 'Denim Jeans', category: 'Clothing', buyPrice: 900, salePrice: 1400, stock: 25, minStock: 5 },
@@ -352,6 +396,7 @@
         dashboard: 'Business Dashboard',
         pos: 'Point of Sale Terminal',
         products: 'Product Inventory Management',
+        saleshistory: 'Sales History & Invoice Log',
         purchase: 'Stock In & Supplier Purchase',
         stockout: 'Stock Out & Adjustments',
         expense: 'Operational Expense Tracking',
@@ -361,9 +406,10 @@
       updateUI();
     }
 
-    // Product Functions
+    // 1. PRODUCT CRUD (ADD, EDIT, DELETE)
     function saveProduct(e) {
       e.preventDefault();
+      const editIndex = Number(document.getElementById('pEditIndex').value);
       const sku = document.getElementById('pSKU').value.trim();
       const name = document.getElementById('pName').value.trim();
       const category = document.getElementById('pCategory').value.trim();
@@ -372,12 +418,85 @@
       const stock = Number(document.getElementById('pStock').value);
       const minStock = Number(document.getElementById('pMinStock').value);
 
-      products.push({ sku, name, category, buyPrice, salePrice, stock, minStock });
+      const prodObj = { sku, name, category, buyPrice, salePrice, stock, minStock };
+
+      if (editIndex === -1) {
+        // New Product Check
+        if (products.some(p => p.sku.toLowerCase() === sku.toLowerCase())) {
+          return alert('এই SKU-র প্রোডাক্ট ইতোমধ্যে যোগ করা আছে!');
+        }
+        products.push(prodObj);
+      } else {
+        // Edit Existing Product
+        products[editIndex] = prodObj;
+      }
+
+      resetProductForm();
       saveDB();
-      document.getElementById('productForm').reset();
     }
 
-    // Purchase Stock In
+    function editProduct(index) {
+      const p = products[index];
+      document.getElementById('pEditIndex').value = index;
+      document.getElementById('pSKU').value = p.sku;
+      document.getElementById('pName').value = p.name;
+      document.getElementById('pCategory').value = p.category;
+      document.getElementById('pBuyPrice').value = p.buyPrice;
+      document.getElementById('pSalePrice').value = p.salePrice;
+      document.getElementById('pStock').value = p.stock;
+      document.getElementById('pMinStock').value = p.minStock;
+
+      document.getElementById('prodFormTitle').innerText = `Edit Product: ${p.name}`;
+      document.getElementById('pSubmitBtn').innerText = 'Update Product';
+      document.getElementById('pSubmitBtn').className = 'flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded p-2';
+      document.getElementById('pCancelBtn').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetProductForm() {
+      document.getElementById('productForm').reset();
+      document.getElementById('pEditIndex').value = -1;
+      document.getElementById('prodFormTitle').innerText = 'Add New Product';
+      document.getElementById('pSubmitBtn').innerText = 'Save Product';
+      document.getElementById('pSubmitBtn').className = 'flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2';
+      document.getElementById('pCancelBtn').classList.add('hidden');
+    }
+
+    function deleteProduct(index) {
+      if (confirm(`আপনি কি "${products[index].name}" প্রোডাক্টটি সম্পূর্ণ মুছে ফেলতে চান?`)) {
+        products.splice(index, 1);
+        saveDB();
+      }
+    }
+
+    // 2. SALES DELETE & ROLLBACK STOCK
+    function deleteSale(index) {
+      const sale = sales[index];
+      if (confirm(`ইনভয়েস ${sale.id} মুছে ফেলতে চান? এটি ডিলিট করলে কাটা স্টক স্বয়ংক্রিয়ভাবে ফেরত যাবে।`)) {
+        // Rollback Stock
+        sale.items.forEach(cartItem => {
+          const p = products.find(i => i.sku === cartItem.sku);
+          if (p) p.stock += cartItem.qty;
+        });
+
+        // Delete from Ledger
+        const ledgerIndex = ledger.findIndex(l => l.desc.includes(sale.id));
+        if (ledgerIndex !== -1) ledger.splice(ledgerIndex, 1);
+
+        sales.splice(index, 1);
+        saveDB();
+      }
+    }
+
+    // 3. EXPENSE DELETE
+    function deleteExpense(index) {
+      if (confirm('এই খরচের এন্ট্রিটি মুছে ফেলতে চান?')) {
+        expenses.splice(index, 1);
+        saveDB();
+      }
+    }
+
+    // 4. PURCHASE STOCK IN
     function savePurchase(e) {
       e.preventDefault();
       const sku = document.getElementById('purSKU').value;
@@ -396,7 +515,7 @@
       }
     }
 
-    // Stock Out
+    // 5. STOCK OUT
     function saveStockOut(e) {
       e.preventDefault();
       const sku = document.getElementById('outSKU').value;
@@ -413,7 +532,7 @@
       }
     }
 
-    // Expense
+    // 6. EXPENSE SAVE
     function saveExpense(e) {
       e.preventDefault();
       const category = document.getElementById('expCategory').value;
@@ -428,7 +547,7 @@
       alert('Expense recorded!');
     }
 
-    // POS Engine
+    // 7. POS CART & CHECKOUT
     function renderPosProducts() {
       const q = document.getElementById('posSearch').value.toLowerCase();
       const grid = document.getElementById('posProductGrid');
@@ -450,11 +569,11 @@
 
     function addToCart(sku) {
       const p = products.find(i => i.sku === sku);
-      if (!p || p.stock <= 0) return alert('Out of stock!');
+      if (!p || p.stock <= 0) return alert('স্টক আউট!');
 
       const existing = cart.find(i => i.sku === sku);
       if (existing) {
-        if (existing.qty + 1 > p.stock) return alert('Cannot exceed current stock!');
+        if (existing.qty + 1 > p.stock) return alert('বর্তমান স্টকের চেয়ে বেশি অর্ডার নেওয়া যাবে না!');
         existing.qty++;
       } else {
         cart.push({ ...p, qty: 1 });
@@ -500,16 +619,16 @@
     }
 
     function processSale() {
-      if (cart.length === 0) return alert('Cart is empty!');
+      if (cart.length === 0) return alert('Cart খালি!');
       const subtotal = cart.reduce((sum, item) => sum + (item.salePrice * item.qty), 0);
       const discount = Number(document.getElementById('posDiscount').value) || 0;
       const grandTotal = Math.max(0, subtotal - discount);
       const paid = Number(document.getElementById('posPaid').value) || 0;
       const due = Math.max(0, grandTotal - paid);
       const method = document.getElementById('posPaymentMethod').value;
+      const invoiceId = 'INV-' + Date.now().toString().slice(-6);
 
       let cogs = 0;
-      // Deduct stock & calculate COGS
       cart.forEach(cartItem => {
         const p = products.find(i => i.sku === cartItem.sku);
         if (p) {
@@ -518,9 +637,9 @@
         }
       });
 
-      sales.push({
-        id: 'INV-' + Date.now().toString().slice(-6),
-        date: new Date(),
+      sales.unshift({
+        id: invoiceId,
+        date: new Date().toLocaleDateString(),
         subtotal,
         discount,
         grandTotal,
@@ -532,7 +651,7 @@
       });
 
       if (paid > 0) {
-        ledger.push({ type: 'In', amount: paid, account: method, desc: 'POS Sale Collection' });
+        ledger.push({ type: 'In', amount: paid, account: method, desc: `POS Collection ${invoiceId}` });
       }
 
       printThermalReceipt(cart, subtotal, discount, grandTotal, paid, due);
@@ -559,9 +678,9 @@
       window.print();
     }
 
-    // UI Updates and Core Metric Computations
+    // 8. RENDER UI & TABLES
     function updateUI() {
-      // 1. Dashboard calculations
+      // Dashboard calculation
       let totalSales = 0, totalCOGS = 0, totalCustDue = 0;
       sales.forEach(s => {
         totalSales += s.grandTotal;
@@ -581,7 +700,7 @@
       document.getElementById('dashCustDue').innerText = `৳${totalCustDue.toLocaleString()}`;
       document.getElementById('dashExpense').innerText = `৳${totalExp.toLocaleString()}`;
 
-      // 2. Low Stock Table
+      // Low Stock Table
       const lowBody = document.getElementById('lowStockTableBody');
       lowBody.innerHTML = '';
       products.filter(p => p.stock <= p.minStock).forEach(p => {
@@ -596,7 +715,7 @@
         `;
       });
 
-      // 3. Product Table & Dropdowns
+      // Products Table with Edit/Delete Buttons
       const prodBody = document.getElementById('productTableBody');
       const purSelect = document.getElementById('purSKU');
       const outSelect = document.getElementById('outSKU');
@@ -604,7 +723,7 @@
       purSelect.innerHTML = '';
       outSelect.innerHTML = '';
 
-      products.forEach(p => {
+      products.forEach((p, idx) => {
         prodBody.innerHTML += `
           <tr class="hover:bg-gray-50">
             <td class="p-3 font-mono font-medium">${p.sku}</td>
@@ -614,13 +733,54 @@
             <td class="p-3 font-semibold text-blue-600">৳${p.salePrice}</td>
             <td class="p-3 ${p.stock <= p.minStock ? 'text-rose-600 font-bold' : ''}">${p.stock}</td>
             <td class="p-3">৳${(p.stock * p.buyPrice).toLocaleString()}</td>
+            <td class="p-3 text-center space-x-2">
+              <button onclick="editProduct(${idx})" class="text-blue-600 hover:text-blue-800 p-1"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="deleteProduct(${idx})" class="text-rose-600 hover:text-rose-800 p-1"><i class="fa-solid fa-trash"></i></button>
+            </td>
           </tr>
         `;
         purSelect.innerHTML += `<option value="${p.sku}">${p.name} (${p.sku})</option>`;
         outSelect.innerHTML += `<option value="${p.sku}">${p.name} (${p.sku})</option>`;
       });
 
-      // 4. Reports & Cash Flow
+      // Sales History Table
+      const salesBody = document.getElementById('salesHistoryTableBody');
+      salesBody.innerHTML = '';
+      sales.forEach((s, idx) => {
+        salesBody.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-mono font-bold">${s.id}</td>
+            <td class="p-3 text-gray-500">${s.date}</td>
+            <td class="p-3 text-xs">${s.items.map(i => `${i.name} (x${i.qty})`).join(', ')}</td>
+            <td class="p-3 font-bold">৳${s.grandTotal}</td>
+            <td class="p-3 text-emerald-600">৳${s.paid}</td>
+            <td class="p-3 text-rose-600 font-bold">৳${s.due}</td>
+            <td class="p-3"><span class="bg-gray-100 px-2 py-0.5 rounded text-xs">${s.method}</span></td>
+            <td class="p-3 text-center">
+              <button onclick="deleteSale(${idx})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold"><i class="fa-solid fa-trash"></i> Cancel</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      // Expense Log Table
+      const expBody = document.getElementById('expenseTableBody');
+      expBody.innerHTML = '';
+      expenses.forEach((e, idx) => {
+        expBody.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-semibold">${e.category}</td>
+            <td class="p-3 text-gray-500">${e.desc || '-'}</td>
+            <td class="p-3 text-xs">${e.account}</td>
+            <td class="p-3 font-bold text-rose-600">৳${e.amount}</td>
+            <td class="p-3 text-center">
+              <button onclick="deleteExpense(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      // Reports P&L
       document.getElementById('plSales').innerText = `৳${totalSales.toLocaleString()}`;
       document.getElementById('plCOGS').innerText = `-৳${totalCOGS.toLocaleString()}`;
       document.getElementById('plGross').innerText = `৳${grossProfit.toLocaleString()}`;
@@ -652,7 +812,7 @@
       }
     }
 
-    // Initial Load
+    // Initial Render
     updateUI();
   </script>
 </body>
