@@ -379,6 +379,12 @@
             </div>
             <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-amber-500/25 text-amber-300 border border-amber-500/40">STOCK</span>
           </button>
+          <button id="nav-suppliers" onclick="switchNav('suppliers')" class="sidebar-nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-emerald-200/80 hover:text-white transition">
+            <div class="flex items-center space-x-3">
+              <i class="fa-solid fa-truck-field text-lime-400 w-4 text-center"></i><span>Suppliers (সরবরাহকারী)</span>
+            </div>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-lime-500/25 text-lime-300 border border-lime-500/40">VENDORS</span>
+          </button>
           <button id="nav-sales" onclick="switchNav('sales')" class="sidebar-nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-emerald-200/80 hover:text-white transition">
             <i class="fa-solid fa-file-invoice-dollar text-sky-400 w-4 text-center"></i><span>Sales & Invoices</span>
           </button>
@@ -1065,6 +1071,391 @@
                   </tr>
                 </tfoot>
               </table>
+            </div>
+          </div>
+
+        </section>
+
+
+        <!-- ============================================================ -->
+        <!-- TAB: SUPPLIERS MANAGEMENT & SOURCING/SALES/LEDGER -->
+        <!-- ============================================================ -->
+        <section id="sec-suppliers" class="hidden space-y-6">
+          
+          <!-- Top KPI Metrics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Suppliers (মোট সরবরাহকারী)</span>
+                <h3 id="sup-kpi-count" class="text-2xl font-black text-slate-900 mt-1">0</h3>
+                <span class="text-[10px] text-slate-500 font-semibold">রেজিস্টার্ড ভেন্ডর ও সাপ্লায়ার</span>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-lime-50 text-lime-600 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-truck-field"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Inflow Value (মোট ক্রয়মূল্য)</span>
+                <h3 id="sup-kpi-purchases" class="text-2xl font-black text-indigo-600 mt-1">৳ 0</h3>
+                <span class="text-[10px] text-indigo-500 font-semibold">সরবরাহকৃত পণ্যের মোট ইনভেস্টমেন্ট</span>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-boxes-packing"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Paid (মোট পরিশোধিত)</span>
+                <h3 id="sup-kpi-paid" class="text-2xl font-black text-emerald-600 mt-1">৳ 0</h3>
+                <span class="text-[10px] text-emerald-500 font-semibold">সাপ্লায়ারদের প্রদানকৃত মোট টাকা</span>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                <i class="fa-solid fa-money-bill-transfer"></i>
+              </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-rose-200/80 bg-gradient-to-br from-white to-rose-50/40 shadow-xs flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold text-rose-500 uppercase tracking-wider">Total Payable Due (মোট বকেয়া পাওনা)</span>
+                <h3 id="sup-kpi-due" class="text-2xl font-black text-rose-600 mt-1">৳ 0</h3>
+                <span class="text-[10px] text-rose-600 font-bold">সকল সাপ্লায়ারের বকেয়া ব্যালেন্স</span>
+              </div>
+              <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl font-bold shadow-2xs">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suppliers Module Sub-Navigation Bar -->
+          <div class="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl">
+              <button id="sup-tab-btn-directory" onclick="switchSupplierSubTab('directory')" class="px-4 py-2 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow-xs">
+                <i class="fa-solid fa-address-book mr-1.5 text-indigo-600"></i>Supplier Directory & Balances (তালিকা ও পাওনা)
+              </button>
+              <button id="sup-tab-btn-inflow" onclick="switchSupplierSubTab('inflow')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition">
+                <i class="fa-solid fa-dolly mr-1.5 text-amber-500"></i>Product Inflow & Sourcing (পণ্য এন্ট্রি ও ক্রয়ের হিসাব)
+              </button>
+              <button id="sup-tab-btn-sales" onclick="switchSupplierSubTab('sales')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition">
+                <i class="fa-solid fa-chart-line mr-1.5 text-emerald-600"></i>Supplier Sales & Profit (বিক্রয় ও লাভ রিপোর্ট)
+              </button>
+              <button id="sup-tab-btn-ledger" onclick="switchSupplierSubTab('ledger')" class="px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition">
+                <i class="fa-solid fa-receipt mr-1.5 text-purple-600"></i>Supplier Ledger & Slips (লেজার ও পেমেন্ট স্লিপ)
+              </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="openSupplierPaymentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-money-bill-wave"></i>
+                <span>+ Record Payment (পেমেন্ট প্রদান)</span>
+              </button>
+              <button onclick="openAddSupplierModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-user-plus"></i>
+                <span>+ Add Supplier (নতুন সরবরাহকারী)</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- SUBTAB 1: SUPPLIERS DIRECTORY & BALANCES -->
+          <!-- ========================================== -->
+          <div id="sup-subtab-view-directory" class="space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap justify-between items-center gap-3">
+              <div class="flex items-center space-x-2">
+                <div class="relative">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                  <input type="text" id="sup-search-input" oninput="renderSuppliersTable()" placeholder="Search supplier name, company, phone..." class="pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500 w-64 md:w-80 font-medium">
+                </div>
+                <select id="sup-filter-status" onchange="renderSuppliersTable()" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none">
+                  <option value="ALL">All Balances (সকল)</option>
+                  <option value="DUE">Due Suppliers Only (বকেয়া পাওনাদার)</option>
+                  <option value="CLEARED">Cleared / Zero Due (পরিশোধিত)</option>
+                </select>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <button onclick="exportSuppliersListExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                  <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                  <span>Export Excel</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Suppliers Table -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                  <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th class="px-5 py-3.5">Supplier / Company (কোম্পানি)</th>
+                      <th class="px-5 py-3.5">Contact Details (যোগাযোগ)</th>
+                      <th class="px-5 py-3.5 text-center">Products Sourced (পণ্যের সংখ্যা)</th>
+                      <th class="px-5 py-3.5 font-bold">Total Sourced Value (মোট ক্রয় ৳)</th>
+                      <th class="px-5 py-3.5 font-bold text-emerald-700">Total Paid (পরিশোধ ৳)</th>
+                      <th class="px-5 py-3.5 font-black text-rose-700">Current Due (বকেয়া ৳)</th>
+                      <th class="px-5 py-3.5 text-center">Status</th>
+                      <th class="px-5 py-3.5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="suppliers-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- SUBTAB 2: PRODUCT INFLOW & SOURCING REPORT -->
+          <!-- ========================================== -->
+          <div id="sup-subtab-view-inflow" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap justify-between items-center gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                  <i class="fa-solid fa-boxes-packing text-indigo-600"></i>
+                  <span>Supplier Product Sourcing & Inflow (কোন সাপ্লায়ার থেকে কত পণ্য প্রবেশ করেছে)</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 font-medium">সাপ্লায়ারভিত্তিক পণ্যের সংখ্যা, ক্রয়মূল্য এবং বর্তমান স্টকের পূর্ণাঙ্গ হিসাব</p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <select id="sup-inflow-filter-supplier" onchange="renderSupplierInflowTable()" class="p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none">
+                  <option value="ALL">All Suppliers (সকল সরবরাহকারী)</option>
+                </select>
+
+                <div class="relative">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                  <input type="text" id="sup-inflow-search" oninput="renderSupplierInflowTable()" placeholder="Search product name / code..." class="pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs outline-none focus:bg-white focus:ring-1 focus:ring-indigo-500 w-56 font-medium">
+                </div>
+
+                <button onclick="exportSupplierInflowExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                  <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                  <span>Export Sourcing Excel</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Inflow Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="bg-indigo-50/60 p-4 rounded-2xl border border-indigo-100 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-indigo-600 uppercase">Total Sourced Items (মোট সরবরাহকৃত পণ্য)</span>
+                  <h4 id="sup-inflow-stat-items" class="text-xl font-black text-indigo-950 mt-0.5">0 SKUs</h4>
+                </div>
+                <i class="fa-solid fa-layer-group text-indigo-400 text-lg"></i>
+              </div>
+              <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-emerald-600 uppercase">Total Sourced Units (মোট পিস ইনপুট)</span>
+                  <h4 id="sup-inflow-stat-units" class="text-xl font-black text-emerald-950 mt-0.5">0 Pcs</h4>
+                </div>
+                <i class="fa-solid fa-cubes-stacked text-emerald-400 text-lg"></i>
+              </div>
+              <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-100 flex items-center justify-between">
+                <div>
+                  <span class="text-[10px] font-bold text-purple-600 uppercase">Total Sourcing Cost (মোট ক্রয়মূল্য বিনিয়োগ)</span>
+                  <h4 id="sup-inflow-stat-cost" class="text-xl font-black text-purple-950 mt-0.5">৳ 0</h4>
+                </div>
+                <i class="fa-solid fa-coins text-purple-400 text-lg"></i>
+              </div>
+            </div>
+
+            <!-- Inflow Table -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                  <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th class="px-5 py-3.5">Supplier Name (সরবরাহকারী)</th>
+                      <th class="px-5 py-3.5">Product & SKU (পণ্য ও কোড)</th>
+                      <th class="px-5 py-3.5">Category</th>
+                      <th class="px-5 py-3.5 text-center font-bold">Initial Inflow (ইনপুট স্টক)</th>
+                      <th class="px-5 py-3.5 font-bold">Unit Purchase (ক্রয়মূল্য ৳)</th>
+                      <th class="px-5 py-3.5 font-bold text-indigo-700">Total Purchase Cost (৳)</th>
+                      <th class="px-5 py-3.5 font-bold text-emerald-700">Sale Price (বিক্রয় ৳)</th>
+                      <th class="px-5 py-3.5 text-center font-black">Current Stock Remaining</th>
+                    </tr>
+                  </thead>
+                  <tbody id="supplier-inflow-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- SUBTAB 3: SUPPLIER SALES & PROFIT REPORT -->
+          <!-- ========================================== -->
+          <div id="sup-subtab-view-sales" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap justify-between items-center gap-3">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                  <i class="fa-solid fa-chart-line text-emerald-600"></i>
+                  <span>Supplier Sales Performance & Gross Profit (কোন সাপ্লায়ারের প্রোডাক্ট কত বিক্রি ও লাভ হয়েছে)</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 font-medium">POS থেকে প্রতিটি সাপ্লায়ারের পণ্যের বিক্রয় সংখ্যা, মোট আয়, খরচ এবং অর্জিত নিট লাভ</p>
+              </div>
+
+              <div class="flex items-center space-x-2">
+                <button onclick="exportSupplierSalesExcel()" class="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                  <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                  <span>Export Sales Analysis</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sales Performance Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Units Sold (বিক্রিত সংখ্যা)</span>
+                <h3 id="sup-sales-stat-units" class="text-xl font-black text-slate-900 mt-1">0 Pcs</h3>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+                <span class="text-[10px] font-bold text-sky-500 uppercase tracking-wider">Total Sales Revenue (মোট বিক্রয়মূল্য)</span>
+                <h3 id="sup-sales-stat-revenue" class="text-xl font-black text-sky-600 mt-1">৳ 0</h3>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+                <span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Cost of Goods Sold (বিক্রিত পণ্যের ক্রয়মূল্য)</span>
+                <h3 id="sup-sales-stat-cogs" class="text-xl font-black text-amber-600 mt-1">৳ 0</h3>
+              </div>
+              <div class="bg-white p-4 rounded-2xl border border-emerald-200 bg-gradient-to-br from-white to-emerald-50/50 shadow-xs">
+                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Gross Profit Generated (মোট লাভ)</span>
+                <h3 id="sup-sales-stat-profit" class="text-xl font-black text-emerald-600 mt-1">৳ 0</h3>
+              </div>
+            </div>
+
+            <!-- Supplier Sales Table -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                  <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th class="px-5 py-3.5">Supplier Name & Company</th>
+                      <th class="px-5 py-3.5 text-center font-bold">Units Sold (বিক্রিত পিস)</th>
+                      <th class="px-5 py-3.5 font-bold text-sky-700">Total Sales Revenue (বিক্রি ৳)</th>
+                      <th class="px-5 py-3.5 font-bold text-amber-700">Cost of Goods (ক্রয় খরচ ৳)</th>
+                      <th class="px-5 py-3.5 font-black text-emerald-700">Gross Profit (মোট লাভ ৳)</th>
+                      <th class="px-5 py-3.5 text-center font-bold">Profit Margin (%)</th>
+                      <th class="px-5 py-3.5">Top Selling Items from Supplier</th>
+                    </tr>
+                  </thead>
+                  <tbody id="supplier-sales-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- SUBTAB 4: SUPPLIER LEDGER STATEMENT & SLIPS -->
+          <!-- ========================================== -->
+          <div id="sup-subtab-view-ledger" class="hidden space-y-4">
+            <!-- Filter & Supplier Statement Picker -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+              <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900 flex items-center space-x-2">
+                    <i class="fa-solid fa-book-open-reader text-purple-600"></i>
+                    <span>Supplier Account Ledger & Payment Slips (খতিয়ান ও ভাউচার হিস্ট্রি)</span>
+                  </h3>
+                  <p class="text-[11px] text-slate-500 font-medium">প্রতিটি সাপ্লায়ারের সকল পণ্য ক্রয়, টাকা পরিশোধের ভাউচার এবং রানিং বকেয়া ব্যালেন্স স্টেটমেন্ট</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                  <button onclick="openSupplierPaymentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>+ New Payment (পেমেন্ট ভাউচার করুন)</span>
+                  </button>
+                  <button onclick="printCurrentSupplierLedger()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Print Ledger Statement</span>
+                  </button>
+                  <button onclick="exportSupplierLedgerExcel()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                    <span>Export Excel</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Supplier Select & Date Filters -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-slate-100">
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Select Supplier (সরবরাহকারী নির্বাচন করুন) *</label>
+                  <select id="sup-ledger-select" onchange="renderSupplierLedgerTable()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500">
+                    <!-- Populated dynamically via JS -->
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Start Date (শুরুর তারিখ)</label>
+                  <input type="date" id="sup-ledger-start-date" onchange="renderSupplierLedgerTable()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">End Date (শেষ তারিখ)</label>
+                  <input type="date" id="sup-ledger-end-date" onchange="renderSupplierLedgerTable()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">Transaction Type</label>
+                  <select id="sup-ledger-filter-type" onchange="renderSupplierLedgerTable()" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none">
+                    <option value="ALL">All Entries (সকল লেনদেন)</option>
+                    <option value="PURCHASE">Stock Purchases Only (পণ্য ক্রয়)</option>
+                    <option value="PAYMENT">Payments Only (টাকা পরিশোধ)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Supplier Statement Header Card -->
+            <div id="sup-ledger-supplier-card" class="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-5 rounded-2xl shadow-sm flex flex-wrap justify-between items-center gap-4">
+              <div>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-purple-200">Supplier Ledger Account</span>
+                <h2 id="sup-ledger-card-name" class="text-xl font-black mt-0.5">Rahim Textiles Ltd.</h2>
+                <p id="sup-ledger-card-contact" class="text-xs text-purple-200 mt-0.5">Phone: 01711-123456 • Address: Narayanganj, Dhaka</p>
+              </div>
+
+              <div class="flex items-center space-x-4 bg-white/10 backdrop-blur-xs px-5 py-3 rounded-2xl border border-white/15">
+                <div>
+                  <span class="text-[10px] text-purple-200 block">Total Sourced (ক্রয়)</span>
+                  <span id="sup-ledger-card-total-sourced" class="text-sm font-bold text-white">৳ 0</span>
+                </div>
+                <div class="w-px h-8 bg-white/20"></div>
+                <div>
+                  <span class="text-[10px] text-purple-200 block">Total Paid (পরিশোধ)</span>
+                  <span id="sup-ledger-card-total-paid" class="text-sm font-bold text-emerald-300">৳ 0</span>
+                </div>
+                <div class="w-px h-8 bg-white/20"></div>
+                <div>
+                  <span class="text-[10px] text-purple-200 block">Current Due (বর্তমান বকেয়া)</span>
+                  <span id="sup-ledger-card-net-due" class="text-base font-black text-rose-300">৳ 0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ledger Table -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                  <thead class="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                    <tr>
+                      <th class="px-5 py-3.5">Date (তারিখ)</th>
+                      <th class="px-5 py-3.5">Type (লেনদেনের ধরন)</th>
+                      <th class="px-5 py-3.5">Voucher / Ref No</th>
+                      <th class="px-5 py-3.5">Description / Particulars</th>
+                      <th class="px-5 py-3.5 font-bold text-indigo-700 text-right">Debit / Sourced (+৳)</th>
+                      <th class="px-5 py-3.5 font-bold text-emerald-700 text-right">Credit / Paid (-৳)</th>
+                      <th class="px-5 py-3.5 font-black text-slate-900 text-right">Balance Due (বকেয়া ৳)</th>
+                      <th class="px-5 py-3.5">Payment Method</th>
+                      <th class="px-5 py-3.5 text-center">Slip / Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="supplier-ledger-table-body">
+                    <!-- Injected via JS -->
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -2161,6 +2552,16 @@
           </div>
         </div>
 
+        <div>
+          <label class="block font-bold text-slate-700 mb-1 flex justify-between items-center">
+            <span>Supplier / Vendor (সরবরাহকারী) *</span>
+            <span onclick="openAddSupplierModal()" class="text-[10px] text-indigo-600 hover:underline font-bold cursor-pointer">+ New Supplier</span>
+          </label>
+          <select id="prd-form-supplier" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
         <!-- Branch-Wise Stock Distribution Inputs -->
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2.5">
           <div class="flex justify-between items-center">
@@ -2193,6 +2594,250 @@
           <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition shadow-sm">Save Product</button>
         </div>
       </form>
+    </div>
+  </div>
+
+
+  <!-- SUPPLIER MODAL 1: ADD / EDIT SUPPLIER -->
+  <div id="modal-supplier" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="modal-supplier-title" class="text-base font-black text-slate-900 flex items-center space-x-2 font-heading">
+          <i class="fa-solid fa-truck-field text-lime-600"></i>
+          <span>Add New Supplier (নতুন সরবরাহকারী)</span>
+        </h3>
+        <button onclick="closeModal('modal-supplier')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="form-supplier" onsubmit="handleSupplierSubmit(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="sup-form-id">
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Supplier Name (সাপ্লায়ার নাম) *</label>
+            <input type="text" id="sup-form-name" required placeholder="e.g. Rahim Textiles" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Company / Business Name *</label>
+            <input type="text" id="sup-form-company" required placeholder="e.g. Rahim Group Ltd." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Contact Person (প্রতিনিধি)</label>
+            <input type="text" id="sup-form-contact" placeholder="e.g. Md. Rahim" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Phone Number (মোবাইল) *</label>
+            <input type="text" id="sup-form-phone" required placeholder="01711-000000" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-indigo-700 outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Email Address</label>
+            <input type="email" id="sup-form-email" placeholder="sales@supplier.com" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Opening Due (পূর্বের বকেয়া ৳)</label>
+            <input type="number" id="sup-form-opening-due" min="0" step="any" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-rose-600 outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Office / Factory Address (ঠিকানা)</label>
+          <input type="text" id="sup-form-address" placeholder="e.g. Tejgaon, Dhaka - 1208" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:bg-white focus:ring-2 focus:ring-lime-500">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Note / Payment Terms (নোট / শর্তাবলী)</label>
+          <textarea id="sup-form-note" rows="2" placeholder="e.g. 15 days credit terms, Bank A/C info..." class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:bg-white focus:ring-2 focus:ring-lime-500"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+          <button type="button" onclick="closeModal('modal-supplier')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-lime-600 hover:bg-lime-700 text-white rounded-xl font-bold transition shadow-sm">Save Supplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- SUPPLIER MODAL 2: RECORD PAYMENT TO SUPPLIER -->
+  <div id="modal-supplier-payment" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-base font-black text-slate-900 flex items-center space-x-2 font-heading">
+          <i class="fa-solid fa-money-bill-transfer text-emerald-600"></i>
+          <span>Record Supplier Payment (সাপ্লায়ারকে টাকা পরিশোধ)</span>
+        </h3>
+        <button onclick="closeModal('modal-supplier-payment')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="form-supplier-payment" onsubmit="handleSupplierPaymentSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Select Supplier (সরবরাহকারী) *</label>
+          <select id="sup-pay-supplier-id" required onchange="updateSupplierPaymentDueDisplay(this.value)" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 outline-none focus:ring-2 focus:ring-emerald-500">
+            <!-- Populated dynamically via JS -->
+          </select>
+        </div>
+
+        <!-- Current Due Banner -->
+        <div class="p-3 bg-rose-50 rounded-2xl border border-rose-200 flex justify-between items-center text-rose-900">
+          <span class="font-bold">Current Outstanding Due:</span>
+          <span id="sup-pay-current-due-display" class="font-black text-base text-rose-600">৳ 0</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Payment Amount (পরিশোধের পরিমাণ ৳) *</label>
+            <input type="number" id="sup-pay-amount" required min="1" step="any" placeholder="5000" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-black text-emerald-600 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-emerald-500">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Payment Date (তারিখ) *</label>
+            <input type="date" id="sup-pay-date" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Payment Method *</label>
+            <select id="sup-pay-method" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none">
+              <option value="Cash">Cash (নগদ)</option>
+              <option value="Bank Transfer">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
+              <option value="bKash">bKash (বিকাশ)</option>
+              <option value="Nagad">Nagad (নগদ ওয়ালেট)</option>
+              <option value="Rocket">Rocket</option>
+              <option value="Cheque">Cheque (চেক)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Cheque / Trx ID / Ref</label>
+            <input type="text" id="sup-pay-ref" placeholder="e.g. CHQ-9912 / TXN-812" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold outline-none focus:ring-2 focus:ring-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Remarks / Note (বিবরণ)</label>
+          <input type="text" id="sup-pay-note" placeholder="e.g. Partial settlement for invoice #102" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium outline-none focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200 text-emerald-950 flex items-center space-x-2">
+          <input type="checkbox" id="sup-pay-sync-accounts" checked class="w-4 h-4 text-emerald-600 rounded">
+          <label for="sup-pay-sync-accounts" class="font-bold text-[11px] cursor-pointer">Auto record as Expense in Accounts Cash Ledger (হিসাব খতিয়ানে খরচ হিসেবে যোগ করুন)</label>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+          <button type="button" onclick="closeModal('modal-supplier-payment')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">Cancel</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-sm flex items-center space-x-1.5">
+            <i class="fa-solid fa-check"></i>
+            <span>Confirm & Print Voucher</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- SUPPLIER MODAL 3: PRINTABLE SUPPLIER PAYMENT SLIP / VOUCHER -->
+  <div id="modal-supplier-voucher" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[95vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3 print:hidden">
+        <h3 class="text-base font-black text-slate-900 flex items-center space-x-2 font-heading">
+          <i class="fa-solid fa-receipt text-purple-600"></i>
+          <span>Supplier Payment Voucher Slip (পেমেন্ট স্লিপ)</span>
+        </h3>
+        <div class="flex items-center space-x-2">
+          <button onclick="printSupplierVoucherSlip()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center space-x-1.5 shadow-sm cursor-pointer">
+            <i class="fa-solid fa-print"></i><span>Print Slip</span>
+          </button>
+          <button onclick="closeModal('modal-supplier-voucher')" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Printable Slip Content Container -->
+      <div id="supplier-voucher-printable-area" class="p-6 bg-white border-2 border-slate-300 rounded-2xl space-y-4 text-slate-800 text-xs font-sans">
+        <!-- Store Header -->
+        <div class="text-center border-b-2 border-slate-800 pb-3">
+          <h2 id="voucher-store-name" class="text-lg font-black uppercase tracking-wide text-slate-950 font-heading">RTR POS & ERP ENTERPRISE</h2>
+          <p id="voucher-store-address" class="text-[11px] text-slate-600 font-medium">Tejgaon Commercial Area, Dhaka - 1208, Bangladesh</p>
+          <p id="voucher-store-phone" class="text-[11px] text-slate-600 font-bold">Hotline: +880 1800-000000</p>
+          <div class="mt-2 inline-block px-3 py-1 bg-slate-900 text-white font-black text-xs uppercase tracking-widest rounded-md">
+            Supplier Payment Voucher (পেমেন্ট রশিদ)
+          </div>
+        </div>
+
+        <!-- Voucher Meta -->
+        <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-3 rounded-xl border border-slate-200">
+          <div>
+            <span class="text-slate-500 font-semibold block">Voucher No:</span>
+            <b id="voucher-slip-no" class="font-mono text-slate-900 text-xs">SPV-20260829-001</b>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-500 font-semibold block">Date & Time:</span>
+            <b id="voucher-slip-date" class="text-slate-900">29 Aug 2026, 06:20 PM</b>
+          </div>
+          <div class="col-span-2 pt-1 border-t border-slate-200">
+            <span class="text-slate-500 font-semibold block">Supplier Name:</span>
+            <b id="voucher-slip-supplier" class="text-indigo-900 text-sm">Rahim Textiles Ltd. (Rahim Group)</b>
+            <p id="voucher-slip-contact" class="text-[10px] text-slate-500">Phone: 01711-123456 • Narayanganj, Dhaka</p>
+          </div>
+        </div>
+
+        <!-- Payment Breakdown Table -->
+        <table class="w-full border-collapse border border-slate-300 text-xs">
+          <tbody>
+            <tr class="border-b border-slate-200 bg-slate-50">
+              <td class="p-2.5 font-semibold text-slate-600">Previous Total Due (পূর্বের বকেয়া)</td>
+              <td id="voucher-slip-prev-due" class="p-2.5 font-bold text-right text-rose-600">৳ 35,000</td>
+            </tr>
+            <tr class="border-b border-slate-800 bg-emerald-50 text-emerald-950">
+              <td class="p-2.5 font-black text-sm">Amount Paid Today (পরিশোধিত টাকা)</td>
+              <td id="voucher-slip-amount-paid" class="p-2.5 font-black text-base text-right text-emerald-700">৳ 20,000</td>
+            </tr>
+            <tr class="border-b border-slate-200">
+              <td class="p-2.5 font-bold text-slate-800">Remaining Balance Due (অবশিষ্ট বকেয়া পাওনা)</td>
+              <td id="voucher-slip-remaining-due" class="p-2.5 font-black text-right text-rose-600">৳ 15,000</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 text-slate-600">Payment Method & Reference</td>
+              <td id="voucher-slip-payment-method" class="p-2.5 font-bold text-right text-slate-800">Bank Transfer (Trx: EBL-98214)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Amount In Words & Remarks -->
+        <div class="space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px]">
+          <div><span class="text-slate-500 font-semibold">Amount in Words:</span> <b id="voucher-slip-words" class="text-slate-900 capitalize">Twenty Thousand Taka Only</b></div>
+          <div><span class="text-slate-500 font-semibold">Remarks / Note:</span> <span id="voucher-slip-remarks" class="text-slate-700">Monthly supplier settlement</span></div>
+        </div>
+
+        <!-- Signatures -->
+        <div class="pt-8 grid grid-cols-2 gap-8 text-center text-[10px]">
+          <div>
+            <div class="border-t border-slate-800 w-36 mx-auto"></div>
+            <span class="font-bold text-slate-700 block mt-1">Supplier Receiver Signature</span>
+            <span class="text-slate-400">(সাপ্লায়ার প্রতিনিধি)</span>
+          </div>
+          <div>
+            <div class="border-t border-slate-800 w-36 mx-auto"></div>
+            <span class="font-bold text-slate-700 block mt-1">Authorized Store Manager</span>
+            <span class="text-slate-400">(অনুমোদিত স্বাক্ষর)</span>
+          </div>
+        </div>
+
+        <p class="text-[9px] text-center text-slate-400 pt-2 border-t border-slate-100">
+          Generated automatically by ApexPOS Cloud Enterprise • Thank you for your business.
+        </p>
+      </div>
+
+      <div class="pt-2 border-t border-slate-100 flex justify-end space-x-2 print:hidden">
+        <button onclick="closeModal('modal-supplier-voucher')" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold text-xs">Close</button>
+        <button onclick="printSupplierVoucherSlip()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center space-x-1.5">
+          <i class="fa-solid fa-print"></i><span>Print Slip</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -3630,6 +4275,93 @@
     let firebaseUnsubscribers = [];
     let currentUser = null;
     let posCart = [];
+    let currentSupplierSubTab = 'directory';
+
+    // Suppliers & Vendors Registry
+    const DEFAULT_SUPPLIERS = [
+      {
+        id: 1,
+        name: 'Rahim Textiles Ltd.',
+        company: 'Rahim Group of Industries',
+        contact_person: 'Md. Rahim Ullah',
+        phone: '01711-123456',
+        email: 'sales@rahimtextiles.com',
+        address: 'Narayanganj BSCIC, Dhaka',
+        opening_due: 15000,
+        note: 'Primary clothing, denim & cotton fabric supplier',
+        status: 'Active',
+        created_at: '2026-01-10'
+      },
+      {
+        id: 2,
+        name: 'Smart Electronics BD',
+        company: 'Smart Distribution Hub',
+        contact_person: 'Shafiqul Islam',
+        phone: '01822-654321',
+        email: 'supply@smartelectronics.com',
+        address: 'Elephant Road Multiplan, Dhaka',
+        opening_due: 25000,
+        note: 'Audio, wireless accessories & digital gadgets',
+        status: 'Active',
+        created_at: '2026-01-15'
+      },
+      {
+        id: 3,
+        name: 'Fresh Living & Accessories',
+        company: 'Bengal Lifestyle Imports',
+        contact_person: 'Anisur Rahman',
+        phone: '01933-789012',
+        email: 'orders@bengallifestyle.com',
+        address: 'Kawran Bazar Trade Center, Dhaka',
+        opening_due: 8000,
+        note: 'Flasks, household utility & lifestyle accessories',
+        status: 'Active',
+        created_at: '2026-02-01'
+      },
+      {
+        id: 4,
+        name: 'Apex Footwear & Leather Works',
+        company: 'Apex Tannery Distribution',
+        contact_person: 'Kazi Faruk Ahmed',
+        phone: '01644-998877',
+        email: 'info@apexleatherbd.com',
+        address: 'Hazaribagh Tannery Area, Dhaka',
+        opening_due: 0,
+        note: 'Leather wallets, shoes, boots & belts',
+        status: 'Active',
+        created_at: '2026-02-15'
+      }
+    ];
+
+    const DEFAULT_SUPPLIER_PAYMENTS = [
+      {
+        id: 101,
+        payment_no: 'SPV-20260210-001',
+        supplier_id: 1,
+        supplier_name: 'Rahim Textiles Ltd.',
+        amount: 20000,
+        date: '2026-02-10',
+        payment_method: 'Bank Transfer',
+        transaction_ref: 'EBL-TRX-98214',
+        note: 'Monthly partial invoice settlement',
+        received_by: 'Tanvir Ahmed (Warehouse)'
+      },
+      {
+        id: 102,
+        payment_no: 'SPV-20260220-002',
+        supplier_id: 2,
+        supplier_name: 'Smart Electronics BD',
+        amount: 15000,
+        date: '2026-02-20',
+        payment_method: 'bKash (Merchant)',
+        transaction_ref: 'BK-87391823',
+        note: 'Wireless earbuds lot payment',
+        received_by: 'Admin'
+      }
+    ];
+
+    let suppliersData = JSON.parse(localStorage.getItem('apex_suppliers')) || DEFAULT_SUPPLIERS;
+    let supplierPaymentsData = JSON.parse(localStorage.getItem('apex_supplier_payments')) || DEFAULT_SUPPLIER_PAYMENTS;
 
     // Multi-Branch Registry
     const DEFAULT_BRANCHES = [
@@ -3785,12 +4517,12 @@
     ];
 
     const DEFAULT_PRODUCTS = [
-      { id: 1, product_code: 'PRD-101', product_name: 'Premium Cotton Polo Shirt', category: 'Clothing', purchase_price: 350, sale_price: 650, stock: 45, branch_stocks: { 1: 20, 2: 15, 3: 6, 4: 4 }, image_url: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=200' },
-      { id: 2, product_code: 'PRD-102', product_name: 'Slim Fit Denim Jeans', category: 'Clothing', purchase_price: 600, sale_price: 1250, stock: 28, branch_stocks: { 1: 10, 2: 8, 3: 6, 4: 4 }, image_url: 'https://images.unsplash.com/photo-1542272604-780c96856592?w=200' },
-      { id: 3, product_code: 'PRD-103', product_name: 'Wireless Bluetooth Earbuds', category: 'Electronics', purchase_price: 850, sale_price: 1550, stock: 18, branch_stocks: { 1: 8, 2: 5, 3: 3, 4: 2 }, image_url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200' },
-      { id: 4, product_code: 'PRD-104', product_name: 'Leather Executive Wallet', category: 'Accessories', purchase_price: 250, sale_price: 550, stock: 12, branch_stocks: { 1: 6, 2: 3, 3: 2, 4: 1 }, image_url: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=200' },
-      { id: 5, product_code: 'PRD-105', product_name: 'Casual Canvas Sneakers', category: 'Footwear', purchase_price: 700, sale_price: 1400, stock: 20, branch_stocks: { 1: 8, 2: 6, 3: 4, 4: 2 }, image_url: 'https://images.unsplash.com/photo-1525966226566-35c3443e7a6f?w=200' },
-      { id: 6, product_code: 'PRD-106', product_name: 'Stainless Steel Water Flask', category: 'Accessories', purchase_price: 220, sale_price: 480, stock: 15, branch_stocks: { 1: 5, 2: 4, 3: 3, 4: 3 }, image_url: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=200' }
+      { id: 1, product_code: 'PRD-101', product_name: 'Premium Cotton Polo Shirt', category: 'Clothing', supplier_id: 1, supplier_name: 'Rahim Textiles Ltd.', initial_inflow_units: 60, purchase_price: 350, sale_price: 650, stock: 45, branch_stocks: { 1: 20, 2: 15, 3: 6, 4: 4 }, image_url: 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=200' },
+      { id: 2, product_code: 'PRD-102', product_name: 'Slim Fit Denim Jeans', category: 'Clothing', supplier_id: 1, supplier_name: 'Rahim Textiles Ltd.', initial_inflow_units: 40, purchase_price: 600, sale_price: 1250, stock: 28, branch_stocks: { 1: 10, 2: 8, 3: 6, 4: 4 }, image_url: 'https://images.unsplash.com/photo-1542272604-780c96856592?w=200' },
+      { id: 3, product_code: 'PRD-103', product_name: 'Wireless Bluetooth Earbuds', category: 'Electronics', supplier_id: 2, supplier_name: 'Smart Electronics BD', initial_inflow_units: 30, purchase_price: 850, sale_price: 1550, stock: 18, branch_stocks: { 1: 8, 2: 5, 3: 3, 4: 2 }, image_url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200' },
+      { id: 4, product_code: 'PRD-104', product_name: 'Leather Executive Wallet', category: 'Accessories', supplier_id: 4, supplier_name: 'Apex Footwear & Leather Works', initial_inflow_units: 25, purchase_price: 250, sale_price: 550, stock: 12, branch_stocks: { 1: 6, 2: 3, 3: 2, 4: 1 }, image_url: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=200' },
+      { id: 5, product_code: 'PRD-105', product_name: 'Casual Canvas Sneakers', category: 'Footwear', supplier_id: 4, supplier_name: 'Apex Footwear & Leather Works', initial_inflow_units: 35, purchase_price: 700, sale_price: 1400, stock: 20, branch_stocks: { 1: 8, 2: 6, 3: 4, 4: 2 }, image_url: 'https://images.unsplash.com/photo-1525966226566-35c3443e7a6f?w=200' },
+      { id: 6, product_code: 'PRD-106', product_name: 'Stainless Steel Water Flask', category: 'Accessories', supplier_id: 3, supplier_name: 'Fresh Living & Accessories', initial_inflow_units: 30, purchase_price: 220, sale_price: 480, stock: 15, branch_stocks: { 1: 5, 2: 4, 3: 3, 4: 3 }, image_url: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=200' }
     ];
 
     const DEFAULT_TRANSFERS = [
@@ -4231,6 +4963,44 @@
         }, err => console.warn('Firestore Branches sync notice:', err.message));
         firebaseUnsubscribers.push(unsubBranches);
 
+        // 7. SUPPLIERS REALTIME SYNC
+        const unsubSuppliers = firebaseDb.collection('suppliers').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            suppliersData = list;
+            localStorage.setItem('apex_suppliers', JSON.stringify(suppliersData));
+            renderSuppliersTable();
+            populateSupplierDropdowns();
+            renderSupplierInflowTable();
+            renderSupplierSalesTable();
+            renderSupplierLedgerTable();
+          }
+        }, err => console.warn('Firestore Suppliers sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubSuppliers);
+
+        // 8. SUPPLIER PAYMENTS REALTIME SYNC
+        const unsubSupplierPayments = firebaseDb.collection('supplier_payments').onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            const list = [];
+            snapshot.forEach(doc => {
+              const item = doc.data();
+              if (!item.id) item.id = doc.id;
+              list.push(item);
+            });
+            list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            supplierPaymentsData = list;
+            localStorage.setItem('apex_supplier_payments', JSON.stringify(supplierPaymentsData));
+            renderSuppliersTable();
+            renderSupplierLedgerTable();
+          }
+        }, err => console.warn('Firestore Supplier Payments sync notice:', err.message));
+        firebaseUnsubscribers.push(unsubSupplierPayments);
+
       } catch (err) {
         console.warn('Realtime sync setup exception:', err);
       }
@@ -4320,6 +5090,36 @@
       } catch (e) { console.warn('Branch Firestore delete err:', e); }
     }
 
+    async function dbSyncSupplier(supplier) {
+      if (!firebaseDb || !supplier) return;
+      try {
+        const docId = String(supplier.id || Date.now());
+        await firebaseDb.collection('suppliers').doc(docId).set(supplier, { merge: true });
+      } catch (e) { console.warn('Supplier Firestore sync err:', e); }
+    }
+
+    async function dbDeleteSupplier(supplierId) {
+      if (!firebaseDb || !supplierId) return;
+      try {
+        await firebaseDb.collection('suppliers').doc(String(supplierId)).delete();
+      } catch (e) { console.warn('Supplier Firestore delete err:', e); }
+    }
+
+    async function dbSyncSupplierPayment(payment) {
+      if (!firebaseDb || !payment) return;
+      try {
+        const docId = String(payment.id || Date.now());
+        await firebaseDb.collection('supplier_payments').doc(docId).set(payment, { merge: true });
+      } catch (e) { console.warn('Supplier Payment Firestore sync err:', e); }
+    }
+
+    async function dbDeleteSupplierPayment(paymentId) {
+      if (!firebaseDb || !paymentId) return;
+      try {
+        await firebaseDb.collection('supplier_payments').doc(String(paymentId)).delete();
+      } catch (e) { console.warn('Supplier Payment Firestore delete err:', e); }
+    }
+
     async function seedAllDataToFirestore() {
       if (!firebaseDb) {
         Swal.fire('Notice', 'Firebase is not initialized yet.', 'warning');
@@ -4328,7 +5128,7 @@
 
       Swal.fire({
         title: 'Uploading to Firebase...',
-        html: 'Local products, employees & branch data are being uploaded to Cloud Firestore.',
+        html: 'Local products, suppliers, employees & branch data are being uploaded to Cloud Firestore.',
         allowOutsideClick: false,
         didOpen: () => { Swal.showLoading(); }
       });
@@ -4337,6 +5137,14 @@
         // Upload Branches
         for (const b of branchesData) {
           await firebaseDb.collection('branches').doc(String(b.id)).set(b, { merge: true });
+        }
+        // Upload Suppliers
+        for (const s of suppliersData) {
+          await firebaseDb.collection('suppliers').doc(String(s.id)).set(s, { merge: true });
+        }
+        // Upload Supplier Payments
+        for (const sp of supplierPaymentsData) {
+          await firebaseDb.collection('supplier_payments').doc(String(sp.id)).set(sp, { merge: true });
         }
         // Upload Products
         for (const p of productsData) {
@@ -4503,6 +5311,7 @@
       const navMap = {
         'nav-pos': isAdmin || isManager || p.can_pos,
         'nav-products': isAdmin || isManager || p.can_products,
+        'nav-suppliers': isAdmin || isManager || p.can_products || p.can_accounts,
         'nav-sales': isAdmin || isManager || p.can_sales,
         'nav-employees': isAdmin || isManager || p.can_employees,
         'nav-accounts': isAdmin || isManager || p.can_accounts,
@@ -4572,7 +5381,7 @@
 
     // --- Navigation Switching ---
     function switchNav(tabId) {
-      const sections = ['dashboard', 'pos', 'products', 'sales', 'employees', 'accounts', 'reports', 'inventory', 'transfers', 'settings'];
+      const sections = ['dashboard', 'pos', 'products', 'suppliers', 'sales', 'employees', 'accounts', 'reports', 'inventory', 'transfers', 'settings'];
       sections.forEach(s => {
         const el = document.getElementById(`sec-${s}`);
         const navBtn = document.getElementById(`nav-${s}`);
@@ -4595,6 +5404,7 @@
         dashboard: { t: 'Dashboard', sub: 'Real-time enterprise overview & POS transactions' },
         pos: { t: 'POS Terminal (বিক্রয় টার্মিনাল)', sub: 'Fast barcode search, multi-item cart & instant checkout' },
         products: { t: 'Product & Stock Inventory', sub: 'Product catalog, pricing, SKU codes & stock alert' },
+        suppliers: { t: 'Suppliers Management & Ledger (সরবরাহকারী ও লেজার)', sub: 'সাপ্লায়ার ডিরেক্টরি, পণ্য সরবরাহ (Inflow), বিক্রয় ও লাভ এনালাইসিস এবং পেমেন্ট স্লিপ/ভাউচার' },
         sales: { t: 'Sales Invoices Log', sub: 'Complete sales history, thermal receipts and cashier audit' },
         employees: { t: 'Employee & Staff Directory', sub: 'Department roles, contact directory and monthly salary' },
         accounts: { t: 'Accounts (আয় ও ব্যয়)', sub: 'Income & expense ledger, cashbook and net balance' },
@@ -4619,6 +5429,7 @@
         }, 150);
       }
       if (tabId === 'products') renderProductsTable();
+      if (tabId === 'suppliers') renderSuppliersSection();
       if (tabId === 'sales') renderSalesTable();
       if (tabId === 'employees') renderEmployeesTable();
       if (tabId === 'accounts') renderAccountsTable();
@@ -6318,6 +7129,10 @@
         calcProductFormTotalStock();
       }
 
+      populateSupplierDropdowns();
+      const supSelect = document.getElementById('prd-form-supplier');
+      if (supSelect && suppliersData.length > 0) supSelect.value = String(suppliersData[0].id);
+
       openModal('modal-product');
     }
 
@@ -6325,6 +7140,7 @@
       const prod = productsData.find(p => p.id === id);
       if (!prod) return;
 
+      populateSupplierDropdowns();
       document.getElementById('prd-form-id').value = prod.id;
       document.getElementById('prd-form-name').value = prod.product_name;
       document.getElementById('prd-form-code').value = prod.product_code;
@@ -6332,6 +7148,9 @@
       document.getElementById('prd-form-purchase').value = prod.purchase_price;
       document.getElementById('prd-form-sale').value = prod.sale_price;
       document.getElementById('prd-image-preview').src = prod.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150';
+
+      const supSelect = document.getElementById('prd-form-supplier');
+      if (supSelect) supSelect.value = String(prod.supplier_id || (suppliersData[0] ? suppliersData[0].id : ''));
 
       // Ensure branch_stocks structure exists
       if (!prod.branch_stocks || Object.keys(prod.branch_stocks).length === 0) {
@@ -6378,6 +7197,10 @@
       const sale = Number(document.getElementById('prd-form-sale').value) || 0;
       const imgPreview = document.getElementById('prd-image-preview').src;
 
+      const supId = Number(document.getElementById('prd-form-supplier')?.value) || (suppliersData[0] ? suppliersData[0].id : 1);
+      const supObj = suppliersData.find(s => s.id === supId);
+      const supName = supObj ? supObj.name : 'General Supplier';
+
       // Extract branch stocks
       const branchStocks = {};
       let totalStock = 0;
@@ -6399,10 +7222,16 @@
         totalStock = singleStock;
       }
 
+      const existingProd = id ? productsData.find(p => p.id == id) : null;
+      const initialInflow = existingProd ? (existingProd.initial_inflow_units || totalStock) : totalStock;
+
       const productPayload = {
         product_code: code,
         product_name: name,
         category: cat,
+        supplier_id: supId,
+        supplier_name: supName,
+        initial_inflow_units: Math.max(initialInflow, totalStock),
         purchase_price: purchase,
         sale_price: sale,
         stock: totalStock,
@@ -6429,7 +7258,9 @@
       renderProductsTable();
       renderPosProducts();
       renderDashboard();
-      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Product & branch stocks saved successfully!', showConfirmButton: false, timer: 1500 });
+      renderSupplierInflowTable();
+      renderSuppliersTable();
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Product & supplier linkage saved successfully!', showConfirmButton: false, timer: 1500 });
     }
 
     async function deleteProduct(id) {
@@ -10207,10 +11038,994 @@
       });
     }
 
+    // ============================================================
+    // --- SUPPLIERS MANAGEMENT & SOURCING/SALES/LEDGER SYSTEM ---
+    // ============================================================
+
+    function switchSupplierSubTab(subTabId) {
+      currentSupplierSubTab = subTabId;
+      const tabs = ['directory', 'inflow', 'sales', 'ledger'];
+
+      tabs.forEach(t => {
+        const btn = document.getElementById(`sup-tab-btn-${t}`);
+        const view = document.getElementById(`sup-subtab-view-${t}`);
+        if (btn) {
+          if (t === subTabId) {
+            btn.className = 'px-4 py-2 rounded-lg text-xs font-bold transition bg-white text-indigo-900 shadow-xs';
+          } else {
+            btn.className = 'px-4 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-indigo-900 transition';
+          }
+        }
+        if (view) {
+          if (t === subTabId) view.classList.remove('hidden');
+          else view.classList.add('hidden');
+        }
+      });
+
+      if (subTabId === 'directory') renderSuppliersTable();
+      if (subTabId === 'inflow') renderSupplierInflowTable();
+      if (subTabId === 'sales') renderSupplierSalesTable();
+      if (subTabId === 'ledger') renderSupplierLedgerTable();
+    }
+
+    function getSupplierFinancials(supplierId) {
+      const sup = suppliersData.find(s => s.id == supplierId);
+      if (!sup) return { openingDue: 0, totalSourcedCost: 0, totalPaid: 0, netDue: 0, sourcedCount: 0, sourcedUnits: 0 };
+
+      const openingDue = Number(sup.opening_due) || 0;
+      const supProducts = productsData.filter(p => p.supplier_id == supplierId);
+      const sourcedCount = supProducts.length;
+
+      let totalSourcedCost = 0;
+      let sourcedUnits = 0;
+      supProducts.forEach(p => {
+        const units = Number(p.initial_inflow_units) || Number(p.stock) || 0;
+        const unitCost = Number(p.purchase_price) || 0;
+        sourcedUnits += units;
+        totalSourcedCost += (units * unitCost);
+      });
+
+      const totalPaid = supplierPaymentsData
+        .filter(p => p.supplier_id == supplierId)
+        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+      const netDue = Math.max(0, openingDue + totalSourcedCost - totalPaid);
+
+      return {
+        openingDue,
+        totalSourcedCost,
+        totalPaid,
+        netDue,
+        sourcedCount,
+        sourcedUnits
+      };
+    }
+
+    function renderSuppliersSection() {
+      updateSupplierKPIs();
+      populateSupplierDropdowns();
+      switchSupplierSubTab(currentSupplierSubTab || 'directory');
+    }
+
+    function updateSupplierKPIs() {
+      let totalPurchases = 0;
+      let totalPaid = 0;
+      let totalDue = 0;
+
+      suppliersData.forEach(s => {
+        const fin = getSupplierFinancials(s.id);
+        totalPurchases += fin.totalSourcedCost;
+        totalPaid += fin.totalPaid;
+        totalDue += fin.netDue;
+      });
+
+      const countEl = document.getElementById('sup-kpi-count');
+      const purchasesEl = document.getElementById('sup-kpi-purchases');
+      const paidEl = document.getElementById('sup-kpi-paid');
+      const dueEl = document.getElementById('sup-kpi-due');
+
+      if (countEl) countEl.innerText = suppliersData.length;
+      if (purchasesEl) purchasesEl.innerText = `৳ ${totalPurchases.toLocaleString()}`;
+      if (paidEl) paidEl.innerText = `৳ ${totalPaid.toLocaleString()}`;
+      if (dueEl) dueEl.innerText = `৳ ${totalDue.toLocaleString()}`;
+    }
+
+    function renderSuppliersTable() {
+      const tbody = document.getElementById('suppliers-table-body');
+      if (!tbody) return;
+
+      const q = (document.getElementById('sup-search-input')?.value || '').toLowerCase().trim();
+      const statusFilter = document.getElementById('sup-filter-status')?.value || 'ALL';
+
+      const filtered = suppliersData.filter(s => {
+        const matchQ = !q || s.name.toLowerCase().includes(q) || (s.company && s.company.toLowerCase().includes(q)) || (s.phone && s.phone.includes(q));
+        const fin = getSupplierFinancials(s.id);
+        if (statusFilter === 'DUE' && fin.netDue <= 0) return false;
+        if (statusFilter === 'CLEARED' && fin.netDue > 0) return false;
+        return matchQ;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-10 text-slate-400">
+              <i class="fa-solid fa-truck-ramp-box text-3xl text-slate-300 block mb-2"></i>
+              <span>কোন সরবরাহকারী পাওয়া যায়নি। উপরে "+ Add Supplier" এ ক্লিক করে নতুন সরবরাহকারী যোগ করুন।</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(s => {
+        const fin = getSupplierFinancials(s.id);
+        const hasDue = fin.netDue > 0;
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition">
+            <td class="px-5 py-3.5">
+              <div class="font-bold text-slate-900 text-xs flex items-center space-x-2">
+                <span class="w-7 h-7 rounded-lg bg-lime-100 text-lime-800 flex items-center justify-center font-black text-[11px] shadow-2xs">${s.name.charAt(0)}</span>
+                <div>
+                  <span class="block text-slate-900 font-bold">${s.name}</span>
+                  <span class="text-[10px] text-slate-400 block">${s.company || 'Direct Supplier'}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-3.5">
+              <div class="space-y-0.5">
+                <span class="font-mono text-slate-700 font-bold text-xs block"><i class="fa-solid fa-phone text-[10px] text-indigo-500 mr-1"></i>${s.phone || 'N/A'}</span>
+                <span class="text-[10px] text-slate-400 block truncate max-w-[150px]"><i class="fa-solid fa-location-dot text-[9px] text-slate-400 mr-1"></i>${s.address || 'Dhaka'}</span>
+              </div>
+            </td>
+            <td class="px-5 py-3.5 text-center">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                ${fin.sourcedCount} SKUs (${fin.sourcedUnits} pcs)
+              </span>
+            </td>
+            <td class="px-5 py-3.5 font-bold text-slate-800 text-xs">৳ ${fin.totalSourcedCost.toLocaleString()}</td>
+            <td class="px-5 py-3.5 font-bold text-emerald-700 text-xs">৳ ${fin.totalPaid.toLocaleString()}</td>
+            <td class="px-5 py-3.5">
+              <span class="font-black text-xs ${hasDue ? 'text-rose-600' : 'text-slate-400'}">
+                ৳ ${fin.netDue.toLocaleString()}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-center">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${hasDue ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                ${hasDue ? 'Due' : 'Cleared'}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-right space-x-1">
+              <button onclick="openSupplierPaymentModal(${s.id})" title="Pay Supplier" class="p-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg text-xs font-bold transition shadow-2xs cursor-pointer">
+                <i class="fa-solid fa-money-bill-wave"></i> Pay
+              </button>
+              <button onclick="viewSupplierLedger(${s.id})" title="View Ledger Statement" class="p-1.5 bg-purple-50 hover:bg-purple-600 text-purple-600 hover:text-white rounded-lg text-xs font-bold transition shadow-2xs cursor-pointer">
+                <i class="fa-solid fa-receipt"></i> Ledger
+              </button>
+              <button onclick="openEditSupplierModal(${s.id})" title="Edit Supplier" class="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg text-xs transition cursor-pointer">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="deleteSupplier(${s.id})" title="Delete Supplier" class="p-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg text-xs transition cursor-pointer">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewSupplierLedger(supplierId) {
+      const select = document.getElementById('sup-ledger-select');
+      if (select) select.value = String(supplierId);
+      switchSupplierSubTab('ledger');
+    }
+
+    function renderSupplierInflowTable() {
+      const tbody = document.getElementById('supplier-inflow-table-body');
+      if (!tbody) return;
+
+      const supFilter = document.getElementById('sup-inflow-filter-supplier')?.value || 'ALL';
+      const q = (document.getElementById('sup-inflow-search')?.value || '').toLowerCase().trim();
+
+      const matchedProducts = productsData.filter(p => {
+        if (supFilter !== 'ALL' && p.supplier_id != supFilter) return false;
+        if (q && !p.product_name.toLowerCase().includes(q) && !p.product_code.toLowerCase().includes(q) && !p.category.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      let totalUnits = 0;
+      let totalCost = 0;
+
+      matchedProducts.forEach(p => {
+        const u = Number(p.initial_inflow_units) || Number(p.stock) || 0;
+        const c = Number(p.purchase_price) || 0;
+        totalUnits += u;
+        totalCost += (u * c);
+      });
+
+      const statItems = document.getElementById('sup-inflow-stat-items');
+      const statUnits = document.getElementById('sup-inflow-stat-units');
+      const statCost = document.getElementById('sup-inflow-stat-cost');
+      if (statItems) statItems.innerText = `${matchedProducts.length} SKUs`;
+      if (statUnits) statUnits.innerText = `${totalUnits.toLocaleString()} Pcs`;
+      if (statCost) statCost.innerText = `৳ ${totalCost.toLocaleString()}`;
+
+      if (matchedProducts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center py-10 text-slate-400">
+              <i class="fa-solid fa-boxes-stacked text-3xl text-slate-300 block mb-2"></i>
+              <span>কোন পণ্যের সরবরাহ রেকর্ড পাওয়া যায়নি।</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = matchedProducts.map(p => {
+        const sup = suppliersData.find(s => s.id == p.supplier_id) || { name: p.supplier_name || 'General Supplier' };
+        const initialU = Number(p.initial_inflow_units) || Number(p.stock) || 0;
+        const unitP = Number(p.purchase_price) || 0;
+        const totalP = initialU * unitP;
+        const saleP = Number(p.sale_price) || 0;
+        const remainingStock = Number(p.stock) || 0;
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition">
+            <td class="px-5 py-3.5">
+              <span class="font-bold text-slate-900 text-xs block">${sup.name}</span>
+              <span class="text-[10px] text-slate-400">${sup.company || 'Vendor'}</span>
+            </td>
+            <td class="px-5 py-3.5">
+              <div class="flex items-center space-x-2.5">
+                <img src="${p.image_url || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=150'}" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shadow-2xs">
+                <div>
+                  <span class="font-bold text-slate-800 text-xs block">${p.product_name}</span>
+                  <span class="font-mono text-[10px] text-indigo-600 font-bold">${p.product_code}</span>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-3.5">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">${p.category || 'General'}</span>
+            </td>
+            <td class="px-5 py-3.5 text-center font-black text-slate-800 text-xs">${initialU} pcs</td>
+            <td class="px-5 py-3.5 font-bold text-slate-800 text-xs">৳ ${unitP.toLocaleString()}</td>
+            <td class="px-5 py-3.5 font-bold text-indigo-700 text-xs">৳ ${totalP.toLocaleString()}</td>
+            <td class="px-5 py-3.5 font-bold text-emerald-700 text-xs">৳ ${saleP.toLocaleString()}</td>
+            <td class="px-5 py-3.5 text-center">
+              <span class="px-2.5 py-1 rounded-full text-xs font-black ${remainingStock <= 5 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}">
+                ${remainingStock} pcs left
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSupplierSalesTable() {
+      const tbody = document.getElementById('supplier-sales-table-body');
+      if (!tbody) return;
+
+      // Group sales items by supplier
+      const supplierMetrics = {};
+
+      suppliersData.forEach(s => {
+        supplierMetrics[s.id] = {
+          supplier: s,
+          unitsSold: 0,
+          revenue: 0,
+          cogs: 0,
+          grossProfit: 0,
+          productsSoldMap: {} // { [prodName]: qty }
+        };
+      });
+
+      salesData.forEach(sale => {
+        if (!sale.items || !Array.isArray(sale.items)) return;
+        sale.items.forEach(item => {
+          if (item.is_return) return; // skip return negative records
+          const prod = productsData.find(p => p.id === item.product_id || p.product_code === item.product_code);
+          const supId = prod ? (prod.supplier_id || 1) : 1;
+
+          if (!supplierMetrics[supId]) {
+            supplierMetrics[supId] = {
+              supplier: { id: supId, name: prod ? (prod.supplier_name || 'General Supplier') : 'General Supplier', company: '' },
+              unitsSold: 0,
+              revenue: 0,
+              cogs: 0,
+              grossProfit: 0,
+              productsSoldMap: {}
+            };
+          }
+
+          const qty = Number(item.qty) || 1;
+          const unitPrice = Number(item.price) || 0;
+          const unitCost = prod ? (Number(prod.purchase_price) || 0) : (unitPrice * 0.6);
+
+          const itemRev = qty * unitPrice;
+          const itemCost = qty * unitCost;
+
+          supplierMetrics[supId].unitsSold += qty;
+          supplierMetrics[supId].revenue += itemRev;
+          supplierMetrics[supId].cogs += itemCost;
+          supplierMetrics[supId].grossProfit += (itemRev - itemCost);
+
+          const pName = item.product_name || (prod ? prod.product_name : 'Product');
+          supplierMetrics[supId].productsSoldMap[pName] = (supplierMetrics[supId].productsSoldMap[pName] || 0) + qty;
+        });
+      });
+
+      const metricsList = Object.values(supplierMetrics).sort((a, b) => b.revenue - a.revenue);
+
+      let totalUnitsSold = 0;
+      let totalRev = 0;
+      let totalCogs = 0;
+      let totalGrossProfit = 0;
+
+      metricsList.forEach(m => {
+        totalUnitsSold += m.unitsSold;
+        totalRev += m.revenue;
+        totalCogs += m.cogs;
+        totalGrossProfit += m.grossProfit;
+      });
+
+      const statUnits = document.getElementById('sup-sales-stat-units');
+      const statRev = document.getElementById('sup-sales-stat-revenue');
+      const statCogs = document.getElementById('sup-sales-stat-cogs');
+      const statProfit = document.getElementById('sup-sales-stat-profit');
+
+      if (statUnits) statUnits.innerText = `${totalUnitsSold.toLocaleString()} Pcs`;
+      if (statRev) statRev.innerText = `৳ ${totalRev.toLocaleString()}`;
+      if (statCogs) statCogs.innerText = `৳ ${totalCogs.toLocaleString()}`;
+      if (statProfit) statProfit.innerText = `৳ ${totalGrossProfit.toLocaleString()}`;
+
+      if (metricsList.length === 0 || totalUnitsSold === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="text-center py-10 text-slate-400">
+              <i class="fa-solid fa-chart-pie text-3xl text-slate-300 block mb-2"></i>
+              <span>এখনো কোনো বিক্রয় রেকর্ড পাওয়া যায়নি। POS টার্মিনাল থেকে বিক্রি সম্পন্ন হলে রিপোর্ট দেখা যাবে।</span>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = metricsList.map(m => {
+        const margin = m.revenue > 0 ? ((m.grossProfit / m.revenue) * 100).toFixed(1) : 0;
+        const topItems = Object.entries(m.productsSoldMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 2)
+          .map(([name, count]) => `<span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-bold text-slate-700">${name} (${count})</span>`)
+          .join(' ');
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition">
+            <td class="px-5 py-3.5">
+              <span class="font-bold text-slate-900 text-xs block">${m.supplier.name}</span>
+              <span class="text-[10px] text-slate-400">${m.supplier.company || 'Supplier'}</span>
+            </td>
+            <td class="px-5 py-3.5 text-center font-black text-slate-800 text-xs">${m.unitsSold.toLocaleString()} pcs</td>
+            <td class="px-5 py-3.5 font-bold text-sky-700 text-xs">৳ ${m.revenue.toLocaleString()}</td>
+            <td class="px-5 py-3.5 font-bold text-amber-700 text-xs">৳ ${m.cogs.toLocaleString()}</td>
+            <td class="px-5 py-3.5 font-black text-emerald-700 text-xs">৳ ${m.grossProfit.toLocaleString()}</td>
+            <td class="px-5 py-3.5 text-center">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-black ${margin >= 40 ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-800'}">
+                ${margin}%
+              </span>
+            </td>
+            <td class="px-5 py-3.5">
+              <div class="flex flex-wrap gap-1">${topItems || '<span class="text-slate-400 text-[10px]">-</span>'}</div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderSupplierLedgerTable() {
+      const tbody = document.getElementById('supplier-ledger-table-body');
+      const select = document.getElementById('sup-ledger-select');
+      if (!tbody) return;
+
+      let supplierId = select ? select.value : null;
+      if (!supplierId && suppliersData.length > 0) {
+        supplierId = String(suppliersData[0].id);
+        if (select) select.value = supplierId;
+      }
+
+      const sup = suppliersData.find(s => s.id == supplierId);
+      if (!sup) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-slate-400">অনুগ্রহ করে একটি সরবরাহকারী নির্বাচন করুন।</td></tr>`;
+        return;
+      }
+
+      // Update Ledger Header Card
+      const fin = getSupplierFinancials(sup.id);
+      const cardName = document.getElementById('sup-ledger-card-name');
+      const cardContact = document.getElementById('sup-ledger-card-contact');
+      const cardSourced = document.getElementById('sup-ledger-card-total-sourced');
+      const cardPaid = document.getElementById('sup-ledger-card-total-paid');
+      const cardDue = document.getElementById('sup-ledger-card-net-due');
+
+      if (cardName) cardName.innerText = sup.name;
+      if (cardContact) cardContact.innerText = `Company: ${sup.company || 'N/A'} • Phone: ${sup.phone || 'N/A'} • ${sup.address || ''}`;
+      if (cardSourced) cardSourced.innerText = `৳ ${fin.totalSourcedCost.toLocaleString()}`;
+      if (cardPaid) cardPaid.innerText = `৳ ${fin.totalPaid.toLocaleString()}`;
+      if (cardDue) cardDue.innerText = `৳ ${fin.netDue.toLocaleString()}`;
+
+      // Build Ledger Entries Chronologically
+      const ledgerEntries = [];
+
+      // 1. Opening Balance Entry
+      if (sup.opening_due && sup.opening_due > 0) {
+        ledgerEntries.push({
+          date: sup.created_at || '2026-01-01',
+          type: 'Opening Due',
+          refNo: 'OPEN-BAL',
+          description: 'Previous opening balance brought forward',
+          debit: Number(sup.opening_due),
+          credit: 0,
+          method: '-',
+          paymentId: null
+        });
+      }
+
+      // 2. Product Sourcing Purchases Entries
+      const supProducts = productsData.filter(p => p.supplier_id == sup.id);
+      supProducts.forEach(p => {
+        const units = Number(p.initial_inflow_units) || Number(p.stock) || 0;
+        const unitCost = Number(p.purchase_price) || 0;
+        const totalCost = units * unitCost;
+
+        ledgerEntries.push({
+          date: '2026-02-01',
+          type: 'Stock Inflow Purchase',
+          refNo: p.product_code || 'PRD-IN',
+          description: `Supplied ${p.product_name} (${units} pcs @ ৳${unitCost})`,
+          debit: totalCost,
+          credit: 0,
+          method: 'Invoice Sourcing',
+          paymentId: null
+        });
+      });
+
+      // 3. Payment Entries
+      const supPayments = supplierPaymentsData.filter(p => p.supplier_id == sup.id);
+      supPayments.forEach(pay => {
+        ledgerEntries.push({
+          date: pay.date || new Date().toISOString().split('T')[0],
+          type: 'Payment Made',
+          refNo: pay.payment_no || `SPV-${pay.id}`,
+          description: pay.note || `Supplier payment via ${pay.payment_method}`,
+          debit: 0,
+          credit: Number(pay.amount) || 0,
+          method: `${pay.payment_method} ${pay.transaction_ref ? `(${pay.transaction_ref})` : ''}`,
+          paymentId: pay.id
+        });
+      });
+
+      // Sort by date ascending
+      ledgerEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      // Filter by date & type
+      const startDate = document.getElementById('sup-ledger-start-date')?.value;
+      const endDate = document.getElementById('sup-ledger-end-date')?.value;
+      const typeFilter = document.getElementById('sup-ledger-filter-type')?.value || 'ALL';
+
+      let runningBalance = 0;
+
+      const rowsHtml = ledgerEntries.map((entry, idx) => {
+        runningBalance += (entry.debit - entry.credit);
+
+        if (startDate && entry.date < startDate) return '';
+        if (endDate && entry.date > endDate) return '';
+        if (typeFilter === 'PURCHASE' && entry.debit <= 0) return '';
+        if (typeFilter === 'PAYMENT' && entry.credit <= 0) return '';
+
+        const isPayment = entry.credit > 0;
+
+        return `
+          <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition">
+            <td class="px-5 py-3.5 font-mono text-slate-700 text-xs">${entry.date}</td>
+            <td class="px-5 py-3.5">
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${isPayment ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-800'}">
+                ${entry.type}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 font-mono text-xs font-bold text-slate-900">${entry.refNo}</td>
+            <td class="px-5 py-3.5 text-xs text-slate-700">${entry.description}</td>
+            <td class="px-5 py-3.5 font-bold text-indigo-700 text-right text-xs">${entry.debit > 0 ? `৳ ${entry.debit.toLocaleString()}` : '-'}</td>
+            <td class="px-5 py-3.5 font-bold text-emerald-700 text-right text-xs">${entry.credit > 0 ? `৳ ${entry.credit.toLocaleString()}` : '-'}</td>
+            <td class="px-5 py-3.5 font-black text-slate-900 text-right text-xs">৳ ${Math.max(0, runningBalance).toLocaleString()}</td>
+            <td class="px-5 py-3.5 text-xs text-slate-600">${entry.method}</td>
+            <td class="px-5 py-3.5 text-center">
+              ${isPayment && entry.paymentId ? `
+                <button onclick="openSupplierVoucherModal(${entry.paymentId})" title="Print Payment Voucher" class="px-2.5 py-1 bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white rounded-lg text-[11px] font-bold transition shadow-2xs cursor-pointer flex items-center space-x-1 mx-auto">
+                  <i class="fa-solid fa-print"></i><span>Slip</span>
+                </button>
+              ` : '<span class="text-slate-400 text-xs">-</span>'}
+            </td>
+          </tr>
+        `;
+      }).filter(Boolean).join('');
+
+      if (!rowsHtml) {
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-10 text-slate-400">এই ফিল্টারে কোন লেনদেন পাওয়া যায়নি।</td></tr>`;
+      } else {
+        tbody.innerHTML = rowsHtml;
+      }
+    }
+
+    function populateSupplierDropdowns() {
+      const prdSelect = document.getElementById('prd-form-supplier');
+      const inflowSelect = document.getElementById('sup-inflow-filter-supplier');
+      const ledgerSelect = document.getElementById('sup-ledger-select');
+      const paySelect = document.getElementById('sup-pay-supplier-id');
+
+      let opts = suppliersData.map(s => `<option value="${s.id}">${s.name} (${s.company || 'Supplier'})</option>`).join('');
+
+      if (prdSelect) prdSelect.innerHTML = opts;
+      if (inflowSelect) inflowSelect.innerHTML = `<option value="ALL">All Suppliers (সকল সরবরাহকারী)</option>` + opts;
+      if (ledgerSelect) ledgerSelect.innerHTML = opts;
+      if (paySelect) paySelect.innerHTML = opts;
+    }
+
+    function updateSupplierPaymentDueDisplay(supplierId) {
+      const fin = getSupplierFinancials(supplierId);
+      const el = document.getElementById('sup-pay-current-due-display');
+      if (el) el.innerText = `৳ ${fin.netDue.toLocaleString()}`;
+    }
+
+    function openAddSupplierModal() {
+      document.getElementById('form-supplier').reset();
+      document.getElementById('sup-form-id').value = '';
+      document.getElementById('modal-supplier-title').innerText = 'Add New Supplier (নতুন সরবরাহকারী)';
+      openModal('modal-supplier');
+    }
+
+    function openEditSupplierModal(id) {
+      const sup = suppliersData.find(s => s.id == id);
+      if (!sup) return;
+
+      document.getElementById('sup-form-id').value = sup.id;
+      document.getElementById('sup-form-name').value = sup.name || '';
+      document.getElementById('sup-form-company').value = sup.company || '';
+      document.getElementById('sup-form-contact').value = sup.contact_person || '';
+      document.getElementById('sup-form-phone').value = sup.phone || '';
+      document.getElementById('sup-form-email').value = sup.email || '';
+      document.getElementById('sup-form-opening-due').value = sup.opening_due || 0;
+      document.getElementById('sup-form-address').value = sup.address || '';
+      document.getElementById('sup-form-note').value = sup.note || '';
+
+      document.getElementById('modal-supplier-title').innerText = `Edit Supplier: ${sup.name}`;
+      openModal('modal-supplier');
+    }
+
+    async function handleSupplierSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('sup-form-id').value;
+      const name = document.getElementById('sup-form-name').value.trim();
+      const company = document.getElementById('sup-form-company').value.trim();
+      const contact = document.getElementById('sup-form-contact').value.trim();
+      const phone = document.getElementById('sup-form-phone').value.trim();
+      const email = document.getElementById('sup-form-email').value.trim();
+      const openingDue = Number(document.getElementById('sup-form-opening-due').value) || 0;
+      const address = document.getElementById('sup-form-address').value.trim();
+      const note = document.getElementById('sup-form-note').value.trim();
+
+      const supPayload = {
+        name,
+        company,
+        contact_person: contact,
+        phone,
+        email,
+        opening_due: openingDue,
+        address,
+        note,
+        status: 'Active',
+        created_at: new Date().toISOString().split('T')[0]
+      };
+
+      if (id) {
+        const idx = suppliersData.findIndex(s => s.id == id);
+        const updated = { id: Number(id), ...supPayload };
+        if (idx !== -1) suppliersData[idx] = updated;
+        dbSyncSupplier(updated);
+      } else {
+        const newSup = { id: Date.now(), ...supPayload };
+        suppliersData.push(newSup);
+        dbSyncSupplier(newSup);
+      }
+
+      localStorage.setItem('apex_suppliers', JSON.stringify(suppliersData));
+      closeModal('modal-supplier');
+      populateSupplierDropdowns();
+      renderSuppliersSection();
+      Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Supplier profile saved successfully!', showConfirmButton: false, timer: 1500 });
+    }
+
+    async function deleteSupplier(id) {
+      if (!checkAdminDeletePermission('সরবরাহকারী ডিলিট')) return;
+      const res = await Swal.fire({
+        title: 'Delete Supplier?',
+        text: 'This supplier record will be removed from directory',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e11d48',
+        confirmButtonText: 'Yes, Delete'
+      });
+
+      if (res.isConfirmed) {
+        suppliersData = suppliersData.filter(s => s.id != id);
+        localStorage.setItem('apex_suppliers', JSON.stringify(suppliersData));
+        dbDeleteSupplier(id);
+        populateSupplierDropdowns();
+        renderSuppliersSection();
+        Swal.fire('Deleted!', 'Supplier profile removed', 'success');
+      }
+    }
+
+    function openSupplierPaymentModal(prefillSupplierId = null) {
+      populateSupplierDropdowns();
+      document.getElementById('form-supplier-payment').reset();
+      document.getElementById('sup-pay-date').value = new Date().toISOString().split('T')[0];
+
+      const select = document.getElementById('sup-pay-supplier-id');
+      if (select) {
+        if (prefillSupplierId) select.value = String(prefillSupplierId);
+        else if (suppliersData.length > 0) select.value = String(suppliersData[0].id);
+        updateSupplierPaymentDueDisplay(select.value);
+      }
+
+      openModal('modal-supplier-payment');
+    }
+
+    async function handleSupplierPaymentSubmit(e) {
+      e.preventDefault();
+      const supId = Number(document.getElementById('sup-pay-supplier-id').value);
+      const supObj = suppliersData.find(s => s.id == supId);
+      if (!supObj) return;
+
+      const amount = Number(document.getElementById('sup-pay-amount').value) || 0;
+      const date = document.getElementById('sup-pay-date').value;
+      const method = document.getElementById('sup-pay-method').value;
+      const ref = document.getElementById('sup-pay-ref').value.trim();
+      const note = document.getElementById('sup-pay-note').value.trim();
+      const syncAccounts = document.getElementById('sup-pay-sync-accounts').checked;
+
+      const paymentNo = `SPV-${new Date().getFullYear()}${String(new Date().getMonth()+1).padStart(2,'0')}${String(new Date().getDate()).padStart(2,'0')}-${String(supplierPaymentsData.length + 1).padStart(3, '0')}`;
+
+      const paymentRecord = {
+        id: Date.now(),
+        payment_no: paymentNo,
+        supplier_id: supId,
+        supplier_name: supObj.name,
+        amount: amount,
+        date: date,
+        payment_method: method,
+        transaction_ref: ref,
+        note: note,
+        received_by: currentUser ? currentUser.name : 'Store Manager'
+      };
+
+      supplierPaymentsData.unshift(paymentRecord);
+      localStorage.setItem('apex_supplier_payments', JSON.stringify(supplierPaymentsData));
+      dbSyncSupplierPayment(paymentRecord);
+
+      // Auto record in Accounts Ledger as Expense
+      if (syncAccounts) {
+        const accExpense = {
+          id: Date.now() + 1,
+          type: 'Expense',
+          category: 'Supplier Payment',
+          amount: amount,
+          date: date,
+          payment_method: method,
+          branch_id: (currentBranchId === 'ALL' || !currentBranchId) ? 1 : currentBranchId,
+          note: `Payment to ${supObj.name} (Voucher: ${paymentNo})${note ? ' - ' + note : ''}`
+        };
+        accountsData.unshift(accExpense);
+        localStorage.setItem('apex_accounts', JSON.stringify(accountsData));
+        dbSyncAccount(accExpense);
+        renderAccountsTable();
+      }
+
+      closeModal('modal-supplier-payment');
+      renderSuppliersSection();
+
+      // Launch Voucher Slip for Printing
+      openSupplierVoucherModal(paymentRecord.id);
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Payment Recorded! Voucher: ${paymentNo}`,
+        showConfirmButton: false,
+        timer: 2000
+      });
+    }
+
+    function openSupplierVoucherModal(paymentId) {
+      const pay = supplierPaymentsData.find(p => p.id == paymentId);
+      if (!pay) return;
+
+      const sup = suppliersData.find(s => s.id == pay.supplier_id) || { name: pay.supplier_name, company: '', phone: '', address: '' };
+      const fin = getSupplierFinancials(pay.supplier_id);
+
+      // Store profile
+      const vStoreName = document.getElementById('voucher-store-name');
+      const vStoreAddr = document.getElementById('voucher-store-address');
+      const vStorePhone = document.getElementById('voucher-store-phone');
+
+      if (vStoreName) vStoreName.innerText = storeProfile.name || 'RTR POS & ERP ENTERPRISE';
+      if (vStoreAddr) vStoreAddr.innerText = storeProfile.address || 'Dhaka, Bangladesh';
+      if (vStorePhone) vStorePhone.innerText = `Hotline: ${storeProfile.phone || '+880 1800-000000'}`;
+
+      // Voucher details
+      document.getElementById('voucher-slip-no').innerText = pay.payment_no || `SPV-${pay.id}`;
+      document.getElementById('voucher-slip-date').innerText = new Date(pay.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById('voucher-slip-supplier').innerText = `${sup.name} ${sup.company ? `(${sup.company})` : ''}`;
+      document.getElementById('voucher-slip-contact').innerText = `Phone: ${sup.phone || 'N/A'} • Address: ${sup.address || 'N/A'}`;
+
+      const prevDue = fin.netDue + (Number(pay.amount) || 0);
+      document.getElementById('voucher-slip-prev-due').innerText = `৳ ${prevDue.toLocaleString()}`;
+      document.getElementById('voucher-slip-amount-paid').innerText = `৳ ${Number(pay.amount).toLocaleString()}`;
+      document.getElementById('voucher-slip-remaining-due').innerText = `৳ ${fin.netDue.toLocaleString()}`;
+      document.getElementById('voucher-slip-payment-method').innerText = `${pay.payment_method} ${pay.transaction_ref ? `(Ref: ${pay.transaction_ref})` : ''}`;
+      document.getElementById('voucher-slip-words').innerText = numberToWordsBDT(pay.amount);
+      document.getElementById('voucher-slip-remarks').innerText = pay.note || 'Regular supplier payment settlement';
+
+      openModal('modal-supplier-voucher');
+    }
+
+    function printSupplierVoucherSlip() {
+      const area = document.getElementById('supplier-voucher-printable-area');
+      if (!area) return;
+
+      const printWindow = window.open('', '', 'width=750,height=900');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Supplier Payment Voucher</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @page { size: A5 landscape; margin: 10mm; }
+              body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-print-color-adjust: exact; }
+            </style>
+          </head>
+          <body class="p-6 bg-white">
+            ${area.outerHTML}
+            <script>
+              setTimeout(() => { window.print(); window.close(); }, 350);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    function printCurrentSupplierLedger() {
+      const select = document.getElementById('sup-ledger-select');
+      const supplierId = select ? select.value : null;
+      const sup = suppliersData.find(s => s.id == supplierId);
+      if (!sup) return;
+
+      const fin = getSupplierFinancials(sup.id);
+      const tbody = document.getElementById('supplier-ledger-table-body');
+
+      const printWindow = window.open('', '', 'width=900,height=1000');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Supplier Statement - ${sup.name}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @page { size: A4 portrait; margin: 12mm; }
+              body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-print-color-adjust: exact; }
+            </style>
+          </head>
+          <body class="p-6 bg-white text-xs text-slate-800 space-y-4">
+            <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
+              <div>
+                <h2 class="text-xl font-black uppercase text-slate-900">${storeProfile.name}</h2>
+                <p class="text-xs text-slate-600">${storeProfile.address} • Hotline: ${storeProfile.phone}</p>
+              </div>
+              <div class="text-right">
+                <span class="inline-block bg-slate-900 text-white font-black px-3 py-1 rounded text-xs uppercase">Supplier Ledger Statement</span>
+                <p class="text-[10px] text-slate-500 mt-1">Date: ${new Date().toLocaleDateString()}</p>
+              </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-2 text-xs">
+              <div><b>Supplier:</b> ${sup.name} (${sup.company || 'N/A'})</div>
+              <div><b>Phone:</b> ${sup.phone || 'N/A'}</div>
+              <div><b>Total Purchases:</b> ৳ ${fin.totalSourcedCost.toLocaleString()}</div>
+              <div><b>Total Paid:</b> ৳ ${fin.totalPaid.toLocaleString()}</div>
+              <div class="col-span-2 pt-1 border-t font-black text-sm text-rose-600">Net Outstanding Due: ৳ ${fin.netDue.toLocaleString()}</div>
+            </div>
+
+            <table class="w-full border-collapse border border-slate-300 text-xs">
+              <thead class="bg-slate-100 font-bold border-b border-slate-300">
+                <tr>
+                  <th class="p-2 border">Date</th>
+                  <th class="p-2 border">Type</th>
+                  <th class="p-2 border">Ref No</th>
+                  <th class="p-2 border">Description</th>
+                  <th class="p-2 border text-right">Debit (+৳)</th>
+                  <th class="p-2 border text-right">Credit (-৳)</th>
+                  <th class="p-2 border text-right">Balance Due (৳)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${tbody.innerHTML}
+              </tbody>
+            </table>
+
+            <div class="pt-12 grid grid-cols-2 text-center text-xs">
+              <div><div class="border-t border-slate-800 w-40 mx-auto"></div>Supplier Signature</div>
+              <div><div class="border-t border-slate-800 w-40 mx-auto"></div>Authorized Store Sign</div>
+            </div>
+
+            <script>
+              setTimeout(() => { window.print(); window.close(); }, 350);
+            </script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+
+    function exportSuppliersListExcel() {
+      const rows = suppliersData.map(s => {
+        const fin = getSupplierFinancials(s.id);
+        return {
+          'Supplier Name': s.name,
+          'Company': s.company || '',
+          'Contact Person': s.contact_person || '',
+          'Phone': s.phone || '',
+          'Email': s.email || '',
+          'Address': s.address || '',
+          'Opening Due (BDT)': fin.openingDue,
+          'Total Sourced Purchases (BDT)': fin.totalSourcedCost,
+          'Total Paid (BDT)': fin.totalPaid,
+          'Current Balance Due (BDT)': fin.netDue,
+          'Status': s.status || 'Active'
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Suppliers_Directory');
+      XLSX.writeFile(wb, `Suppliers_List_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    function exportSupplierInflowExcel() {
+      const rows = productsData.map(p => {
+        const sup = suppliersData.find(s => s.id == p.supplier_id) || { name: p.supplier_name || 'General Supplier' };
+        const u = Number(p.initial_inflow_units) || Number(p.stock) || 0;
+        const c = Number(p.purchase_price) || 0;
+        return {
+          'Supplier Name': sup.name,
+          'Product Code': p.product_code,
+          'Product Name': p.product_name,
+          'Category': p.category,
+          'Initial Sourced Inflow (Units)': u,
+          'Unit Purchase Price (BDT)': c,
+          'Total Purchase Cost (BDT)': u * c,
+          'Sale Price (BDT)': p.sale_price,
+          'Current Stock Remaining': p.stock
+        };
+      });
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Product_Sourcing_Inflow');
+      XLSX.writeFile(wb, `Supplier_Product_Inflow_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    function exportSupplierSalesExcel() {
+      const supplierMetrics = {};
+      suppliersData.forEach(s => {
+        supplierMetrics[s.id] = { name: s.name, company: s.company || '', unitsSold: 0, revenue: 0, cogs: 0, profit: 0 };
+      });
+
+      salesData.forEach(sale => {
+        if (!sale.items || !Array.isArray(sale.items)) return;
+        sale.items.forEach(item => {
+          if (item.is_return) return;
+          const prod = productsData.find(p => p.id === item.product_id || p.product_code === item.product_code);
+          const supId = prod ? (prod.supplier_id || 1) : 1;
+          if (!supplierMetrics[supId]) {
+            supplierMetrics[supId] = { name: prod ? prod.supplier_name : 'General Supplier', company: '', unitsSold: 0, revenue: 0, cogs: 0, profit: 0 };
+          }
+          const qty = Number(item.qty) || 1;
+          const price = Number(item.price) || 0;
+          const cost = prod ? (Number(prod.purchase_price) || 0) : (price * 0.6);
+
+          supplierMetrics[supId].unitsSold += qty;
+          supplierMetrics[supId].revenue += (qty * price);
+          supplierMetrics[supId].cogs += (qty * cost);
+          supplierMetrics[supId].profit += ((qty * price) - (qty * cost));
+        });
+      });
+
+      const rows = Object.values(supplierMetrics).map(m => ({
+        'Supplier Name': m.name,
+        'Company': m.company,
+        'Total Units Sold (Pcs)': m.unitsSold,
+        'Total Sales Revenue (BDT)': m.revenue,
+        'Cost of Goods Sold (BDT)': m.cogs,
+        'Gross Profit (BDT)': m.profit,
+        'Profit Margin (%)': m.revenue > 0 ? ((m.profit / m.revenue) * 100).toFixed(1) + '%' : '0%'
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Supplier_Sales_Analysis');
+      XLSX.writeFile(wb, `Supplier_Sales_Profit_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    function exportSupplierLedgerExcel() {
+      const select = document.getElementById('sup-ledger-select');
+      const supplierId = select ? select.value : null;
+      const sup = suppliersData.find(s => s.id == supplierId);
+      if (!sup) return;
+
+      const rows = [];
+      const tbody = document.getElementById('supplier-ledger-table-body');
+      if (tbody) {
+        const trs = tbody.querySelectorAll('tr');
+        trs.forEach(tr => {
+          const tds = tr.querySelectorAll('td');
+          if (tds.length >= 7) {
+            rows.push({
+              'Date': tds[0].innerText.trim(),
+              'Type': tds[1].innerText.trim(),
+              'Ref / Voucher No': tds[2].innerText.trim(),
+              'Description': tds[3].innerText.trim(),
+              'Debit (+BDT)': tds[4].innerText.trim(),
+              'Credit (-BDT)': tds[5].innerText.trim(),
+              'Balance Due (BDT)': tds[6].innerText.trim(),
+              'Payment Method': tds[7] ? tds[7].innerText.trim() : ''
+            });
+          }
+        });
+      }
+
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Supplier_Ledger');
+      XLSX.writeFile(wb, `Supplier_Ledger_${sup.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    }
+
+    function numberToWordsBDT(num) {
+      if (!num || isNaN(num)) return 'Zero Taka Only';
+      const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function inWords(n) {
+        if ((n = n.toString()).length > 9) return 'overflow';
+        let nArray = ('000000000' + n).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!nArray) return '';
+        let str = '';
+        str += (nArray[1] != 0) ? (a[Number(nArray[1])] || b[nArray[1][0]] + ' ' + a[nArray[1][1]]) + 'Crore ' : '';
+        str += (nArray[2] != 0) ? (a[Number(nArray[2])] || b[nArray[2][0]] + ' ' + a[nArray[2][1]]) + 'Lakh ' : '';
+        str += (nArray[3] != 0) ? (a[Number(nArray[3])] || b[nArray[3][0]] + ' ' + a[nArray[3][1]]) + 'Thousand ' : '';
+        str += (nArray[4] != 0) ? (a[Number(nArray[4])] || b[nArray[4][0]] + ' ' + a[nArray[4][1]]) + 'Hundred ' : '';
+        str += (nArray[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(nArray[5])] || b[nArray[5][0]] + ' ' + a[nArray[5][1]]) : '';
+        return str.trim();
+      }
+
+      const words = inWords(Math.round(num));
+      return words ? `${words} Taka Only` : 'Zero Taka Only';
+    }
+
     // Initial Setup
     loadStoreProfile();
     populateCategoryFilters();
     populatePosSalesEmployees();
+    populateSupplierDropdowns();
   </script>
 
 </body>
