@@ -155,43 +155,16 @@
     }
 
     @media print {
-      body * {
-        visibility: hidden !important;
+      @page {
+        margin: 5mm;
       }
-      #printable-receipt-area, #printable-receipt-area * {
-        visibility: visible !important;
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact !important;
       }
-      #printable-barcode-area, #printable-barcode-area * {
-        visibility: visible !important;
-      }
-      #printable-transfer-area, #printable-transfer-area * {
-        visibility: visible !important;
-      }
-      #printable-report-area, #printable-report-area * {
-        visibility: visible !important;
-      }
-      #printable-receipt-area, #printable-transfer-area, #printable-report-area {
-        position: fixed !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 20px !important;
-        box-shadow: none !important;
-        background: white !important;
-        color: black !important;
-        z-index: 9999999 !important;
-      }
-      #printable-barcode-area {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 1.90in;
-        margin: 0;
-        padding: 0;
-        box-shadow: none;
+      .no-print, .print\:hidden {
+        display: none !important;
       }
       .barcode-sticker-item {
         page-break-after: always !important;
@@ -3075,10 +3048,10 @@
       </div>
 
       <div class="pt-2 flex space-x-2">
-        <button onclick="window.print()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-md">
+        <button onclick="printReceiptDirect()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1.5 shadow-md cursor-pointer">
           <i class="fa-solid fa-print"></i><span>Print Thermal Receipt</span>
         </button>
-        <button onclick="closeModal('modal-receipt')" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">
+        <button onclick="closeModal('modal-receipt')" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold cursor-pointer">
           Close
         </button>
       </div>
@@ -6974,14 +6947,87 @@
 
       openModal('modal-receipt');
       
-      // Auto-trigger browser print dialog for thermal receipt printer
+      // Auto-trigger clean receipt print via iframe
       setTimeout(() => {
         try {
-          window.print();
+          printReceiptDirect();
         } catch (pErr) {
           console.warn('Auto-print dialog notice:', pErr);
         }
-      }, 350);
+      }, 450);
+    }
+
+    // --- High-Reliability Isolated Iframe Printing Engine ---
+    function printHtmlWithIframe(title, htmlContent, customStyles = '') {
+      // Remove any existing print iframe
+      const oldFrame = document.getElementById('pos-universal-print-frame');
+      if (oldFrame) oldFrame.remove();
+
+      const iframe = document.createElement('iframe');
+      iframe.id = 'pos-universal-print-frame';
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = 'none';
+      iframe.style.zIndex = '-9999';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>${title}</title>
+            <script src="https://cdn.tailwindcss.com"><\/script>
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+            <style>
+              @page { margin: 5mm; }
+              body { 
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+                background: #ffffff !important; 
+                color: #000000 !important; 
+                -webkit-print-color-adjust: exact !important; 
+                padding: 10px;
+              }
+              .receipt-paper {
+                background: #ffffff !important;
+                color: #000000 !important;
+              }
+              ${customStyles}
+            </style>
+          </head>
+          <body>
+            ${htmlContent}
+          </body>
+        </html>
+      `);
+      doc.close();
+
+      setTimeout(() => {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (err) {
+          console.warn('Iframe print trigger error:', err);
+        }
+      }, 400);
+    }
+
+    function printReceiptDirect() {
+      const receiptArea = document.getElementById('printable-receipt-area');
+      if (!receiptArea) return;
+      const invNo = document.getElementById('rec-inv-no')?.innerText || 'Receipt';
+      const customCss = `
+        @page { size: 80mm auto; margin: 2mm; }
+        body { width: 76mm; margin: 0 auto; padding: 4px; font-size: 11px; }
+        .receipt-paper { width: 100%; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 3px 0; }
+      `;
+      printHtmlWithIframe(`Receipt_${invNo}`, receiptArea.outerHTML, customCss);
     }
 
     // --- Products CRUD ---
@@ -9323,7 +9369,14 @@
     }
 
     function printTransferChallan() {
-      window.print();
+      const area = document.getElementById('printable-transfer-area');
+      if (!area) return;
+      const trfNo = document.getElementById('trf-rec-no')?.innerText || 'Transfer_Challan';
+      const customCss = `
+        @page { size: A4 portrait; margin: 10mm; }
+        body { font-family: system-ui, sans-serif; padding: 15px; }
+      `;
+      printHtmlWithIframe(`Transfer_Challan_${trfNo}`, area.outerHTML, customCss);
     }
 
     function previewCurrentTransferDraft() {
@@ -10014,16 +10067,14 @@
     }
 
     function executeManagerReportPrint() {
-      const printableArea = document.getElementById('printable-report-area');
       const paper = document.getElementById('manager-report-paper');
-      if (!printableArea || !paper) return;
+      if (!paper) return;
 
-      printableArea.innerHTML = paper.innerHTML;
-      printableArea.style.display = 'block';
-      window.print();
-      setTimeout(() => {
-        printableArea.style.display = 'none';
-      }, 1000);
+      const customCss = `
+        @page { size: A4 portrait; margin: 10mm; }
+        body { font-family: system-ui, sans-serif; padding: 15px; }
+      `;
+      printHtmlWithIframe(`Manager_Report_${new Date().toISOString().split('T')[0]}`, paper.innerHTML, customCss);
     }
 
     // --- Excel Data Export Functions ---
@@ -11783,26 +11834,12 @@
       const area = document.getElementById('supplier-voucher-printable-area');
       if (!area) return;
 
-      const printWindow = window.open('', '', 'width=750,height=900');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Supplier Payment Voucher</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              @page { size: A5 landscape; margin: 10mm; }
-              body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-print-color-adjust: exact; }
-            </style>
-          </head>
-          <body class="p-6 bg-white">
-            ${area.outerHTML}
-            <script>
-              setTimeout(() => { window.print(); window.close(); }, 350);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+      const slipNo = document.getElementById('voucher-slip-no')?.innerText || 'Voucher';
+      const customCss = `
+        @page { size: A5 landscape; margin: 8mm; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 15px; }
+      `;
+      printHtmlWithIframe(`Supplier_Voucher_${slipNo}`, area.outerHTML, customCss);
     }
 
     function printCurrentSupplierLedger() {
@@ -11814,66 +11851,58 @@
       const fin = getSupplierFinancials(sup.id);
       const tbody = document.getElementById('supplier-ledger-table-body');
 
-      const printWindow = window.open('', '', 'width=900,height=1000');
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Supplier Statement - ${sup.name}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              @page { size: A4 portrait; margin: 12mm; }
-              body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-print-color-adjust: exact; }
-            </style>
-          </head>
-          <body class="p-6 bg-white text-xs text-slate-800 space-y-4">
-            <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
-              <div>
-                <h2 class="text-xl font-black uppercase text-slate-900">${storeProfile.name}</h2>
-                <p class="text-xs text-slate-600">${storeProfile.address} • Hotline: ${storeProfile.phone}</p>
-              </div>
-              <div class="text-right">
-                <span class="inline-block bg-slate-900 text-white font-black px-3 py-1 rounded text-xs uppercase">Supplier Ledger Statement</span>
-                <p class="text-[10px] text-slate-500 mt-1">Date: ${new Date().toLocaleDateString()}</p>
-              </div>
+      const content = `
+        <div class="p-4 bg-white text-xs text-slate-900 space-y-4 font-sans">
+          <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
+            <div>
+              <h2 class="text-xl font-black uppercase text-slate-900">${storeProfile.name}</h2>
+              <p class="text-xs text-slate-600">${storeProfile.address} • Hotline: ${storeProfile.phone}</p>
             </div>
-
-            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-2 text-xs">
-              <div><b>Supplier:</b> ${sup.name} (${sup.company || 'N/A'})</div>
-              <div><b>Phone:</b> ${sup.phone || 'N/A'}</div>
-              <div><b>Total Purchases:</b> ৳ ${fin.totalSourcedCost.toLocaleString()}</div>
-              <div><b>Total Paid:</b> ৳ ${fin.totalPaid.toLocaleString()}</div>
-              <div class="col-span-2 pt-1 border-t font-black text-sm text-rose-600">Net Outstanding Due: ৳ ${fin.netDue.toLocaleString()}</div>
+            <div class="text-right">
+              <span class="inline-block bg-slate-900 text-white font-black px-3 py-1 rounded text-xs uppercase">Supplier Ledger Statement</span>
+              <p class="text-[10px] text-slate-500 mt-1">Date: ${new Date().toLocaleDateString()}</p>
             </div>
+          </div>
 
-            <table class="w-full border-collapse border border-slate-300 text-xs">
-              <thead class="bg-slate-100 font-bold border-b border-slate-300">
-                <tr>
-                  <th class="p-2 border">Date</th>
-                  <th class="p-2 border">Type</th>
-                  <th class="p-2 border">Ref No</th>
-                  <th class="p-2 border">Description</th>
-                  <th class="p-2 border text-right">Debit (+৳)</th>
-                  <th class="p-2 border text-right">Credit (-৳)</th>
-                  <th class="p-2 border text-right">Balance Due (৳)</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tbody.innerHTML}
-              </tbody>
-            </table>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-2 gap-2 text-xs">
+            <div><b>Supplier:</b> ${sup.name} (${sup.company || 'N/A'})</div>
+            <div><b>Phone:</b> ${sup.phone || 'N/A'}</div>
+            <div><b>Total Purchases:</b> ৳ ${fin.totalSourcedCost.toLocaleString()}</div>
+            <div><b>Total Paid:</b> ৳ ${fin.totalPaid.toLocaleString()}</div>
+            <div class="col-span-2 pt-1 border-t font-black text-sm text-rose-600">Net Outstanding Due: ৳ ${fin.netDue.toLocaleString()}</div>
+          </div>
 
-            <div class="pt-12 grid grid-cols-2 text-center text-xs">
-              <div><div class="border-t border-slate-800 w-40 mx-auto"></div>Supplier Signature</div>
-              <div><div class="border-t border-slate-800 w-40 mx-auto"></div>Authorized Store Sign</div>
-            </div>
+          <table class="w-full border-collapse border border-slate-300 text-xs mt-3">
+            <thead class="bg-slate-100 font-bold border-b border-slate-300">
+              <tr>
+                <th class="p-2 border text-left">Date</th>
+                <th class="p-2 border text-left">Type</th>
+                <th class="p-2 border text-left">Ref No</th>
+                <th class="p-2 border text-left">Description</th>
+                <th class="p-2 border text-right">Debit (+৳)</th>
+                <th class="p-2 border text-right">Credit (-৳)</th>
+                <th class="p-2 border text-right">Balance Due (৳)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tbody ? tbody.innerHTML : ''}
+            </tbody>
+          </table>
 
-            <script>
-              setTimeout(() => { window.print(); window.close(); }, 350);
-            </script>
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
+          <div class="pt-16 grid grid-cols-2 text-center text-xs">
+            <div><div class="border-t border-slate-800 w-44 mx-auto mb-1"></div>Supplier Signature</div>
+            <div><div class="border-t border-slate-800 w-44 mx-auto mb-1"></div>Authorized Store Sign</div>
+          </div>
+        </div>
+      `;
+
+      const customCss = `
+        @page { size: A4 portrait; margin: 10mm; }
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 6px; border: 1px solid #cbd5e1; }
+      `;
+      printHtmlWithIframe(`Supplier_Ledger_${sup.name}`, content, customCss);
     }
 
     function exportSuppliersListExcel() {
