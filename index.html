@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enterprise ERP & Inventory POS</title>
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printReceipt, #printReceipt * { visibility: visible; }
+      #printReceipt { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-slate-900 text-slate-200 flex flex-col justify-between shrink-0">
+    <div>
+      <div class="p-5 text-xl font-black tracking-wider text-white border-b border-slate-800 flex items-center gap-3">
+        <i class="fa-solid fa-boxes-stacked text-blue-500"></i> INVENTORY ERP
+      </div>
+      <nav class="p-3 space-y-1">
+        <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium bg-slate-800 text-white">
+          <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+        </button>
+        <button onclick="switchTab('pos')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-cash-register w-5"></i> POS Screen
+        </button>
+        <button onclick="switchTab('products')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-box-open w-5"></i> Products & Stock
+        </button>
+        <button onclick="switchTab('purchase')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-truck-ramp-box w-5"></i> Stock In / Purchase
+        </button>
+        <button onclick="switchTab('stockout')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-dolly-flatbed w-5"></i> Stock Out / Adjust
+        </button>
+        <button onclick="switchTab('expense')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-wallet w-5"></i> Expense Entry
+        </button>
+        <button onclick="switchTab('reports')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition text-sm font-medium">
+          <i class="fa-solid fa-file-invoice-dollar w-5"></i> P&L & Cash Flow
+        </button>
+      </nav>
+    </div>
+    <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+      v2.0 Enterprise Release
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col overflow-y-auto">
+    
+    <!-- Top Header -->
+    <header class="bg-white border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+      <h2 id="sectionTitle" class="text-xl font-bold text-gray-800">Business Dashboard</h2>
+      <div class="flex items-center gap-4">
+        <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-semibold">● System Online</span>
+        <button onclick="clearDatabase()" class="text-xs text-red-500 hover:underline">Reset Demo Data</button>
+      </div>
+    </header>
+
+    <div class="p-6 flex-1">
+      
+      <!-- 1. DASHBOARD -->
+      <section id="tab-dashboard" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Total Sales Revenue</p>
+            <h3 class="text-2xl font-black text-gray-800 mt-1" id="dashTotalSales">৳0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Gross Profit</p>
+            <h3 class="text-2xl font-black text-emerald-600 mt-1" id="dashGrossProfit">৳0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Net Profit</p>
+            <h3 class="text-2xl font-black text-blue-600 mt-1" id="dashNetProfit">৳0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Total Stock Valuation</p>
+            <h3 class="text-2xl font-black text-gray-800 mt-1" id="dashStockValue">৳0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Customer Total Due</p>
+            <h3 class="text-2xl font-black text-amber-600 mt-1" id="dashCustDue">৳0</h3>
+          </div>
+          <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+            <p class="text-xs text-gray-500 uppercase font-semibold">Total Expenses</p>
+            <h3 class="text-2xl font-black text-rose-600 mt-1" id="dashExpense">৳0</h3>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h4 class="font-bold text-gray-800 mb-3 text-sm">Low Stock Alert (< Min Stock)</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="bg-gray-50 text-gray-500">
+                <tr>
+                  <th class="p-2">SKU</th>
+                  <th class="p-2">Product</th>
+                  <th class="p-2">Current Stock</th>
+                  <th class="p-2">Min Alert</th>
+                  <th class="p-2">Status</th>
+                </tr>
+              </thead>
+              <tbody id="lowStockTableBody" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. POS SCREEN -->
+      <section id="tab-pos" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+          <input type="text" id="posSearch" placeholder="Search by product name or SKU..." oninput="renderPosProducts()" class="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg text-sm focus:outline-blue-500">
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4" id="posProductGrid"></div>
+        </div>
+
+        <!-- POS Cart -->
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between h-[600px]">
+          <div>
+            <h3 class="font-bold text-gray-800 mb-3 border-b pb-2">Billing Details</h3>
+            <div class="overflow-y-auto max-h-52 divide-y text-sm" id="cartItemsList"></div>
+          </div>
+          <div class="border-t pt-3 space-y-2 text-sm">
+            <div class="flex justify-between font-semibold">
+              <span>Subtotal:</span>
+              <span id="posSubtotal">৳0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Discount (৳):</span>
+              <input type="number" id="posDiscount" value="0" oninput="calculatePosTotals()" class="w-24 border rounded p-1 text-right text-sm">
+            </div>
+            <div class="flex justify-between text-base font-black border-t pt-2">
+              <span>Grand Total:</span>
+              <span id="posGrandTotal">৳0</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 pt-2">
+              <div>
+                <label class="text-xs text-gray-500">Paid (৳)</label>
+                <input type="number" id="posPaid" value="0" oninput="calculatePosTotals()" class="w-full border rounded p-1.5 text-sm">
+              </div>
+              <div>
+                <label class="text-xs text-gray-500">Payment Method</label>
+                <select id="posPaymentMethod" class="w-full border rounded p-1.5 text-sm">
+                  <option>Cash in Hand</option>
+                  <option>Bank</option>
+                  <option>Mobile Banking</option>
+                  <option>Courier Delivery</option>
+                </select>
+              </div>
+            </div>
+            <div class="flex justify-between text-xs text-rose-600 font-bold">
+              <span>Due:</span>
+              <span id="posDue">৳0</span>
+            </div>
+            <button onclick="processSale()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition mt-2">
+              Confirm & Print Receipt
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. PRODUCTS & STOCK -->
+      <section id="tab-products" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Add New Product</h3>
+          <form id="productForm" onsubmit="saveProduct(event)" class="grid grid-cols-1 md:grid-cols-4 gap-3 text-sm">
+            <input type="text" id="pSKU" placeholder="SKU (e.g. TS-001)" required class="border p-2 rounded">
+            <input type="text" id="pName" placeholder="Product Name" required class="border p-2 rounded">
+            <input type="text" id="pCategory" placeholder="Category" class="border p-2 rounded">
+            <input type="number" id="pBuyPrice" placeholder="Purchase Price (৳)" required class="border p-2 rounded">
+            <input type="number" id="pSalePrice" placeholder="Sale Price (৳)" required class="border p-2 rounded">
+            <input type="number" id="pStock" placeholder="Initial Stock" required class="border p-2 rounded">
+            <input type="number" id="pMinStock" placeholder="Min Stock Alert" required class="border p-2 rounded">
+            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded p-2">Save Product</button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 text-gray-600 border-b">
+              <tr>
+                <th class="p-3">SKU</th>
+                <th class="p-3">Product Name</th>
+                <th class="p-3">Category</th>
+                <th class="p-3">Buy Price</th>
+                <th class="p-3">Sale Price</th>
+                <th class="p-3">Stock</th>
+                <th class="p-3">Total Value</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody" class="divide-y"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 4. PURCHASE / STOCK IN -->
+      <section id="tab-purchase" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock In / Supplier Purchase</h3>
+          <form id="purchaseForm" onsubmit="savePurchase(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <select id="purSKU" required class="border p-2 rounded"></select>
+            <input type="number" id="purQty" placeholder="Quantity" required class="border p-2 rounded">
+            <input type="number" id="purPrice" placeholder="Purchase Unit Price (৳)" required class="border p-2 rounded">
+            <input type="text" id="purSupplier" placeholder="Supplier Name" required class="border p-2 rounded">
+            <select id="purMethod" class="border p-2 rounded">
+              <option>Cash in Hand</option>
+              <option>Bank</option>
+              <option>Mobile Banking</option>
+            </select>
+            <button type="submit" class="bg-blue-600 text-white font-semibold rounded p-2 hover:bg-blue-700">Receive Stock</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 5. STOCK OUT / ADJUST -->
+      <section id="tab-stockout" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Stock Out Entry (Damage / Office / Sample)</h3>
+          <form id="stockOutForm" onsubmit="saveStockOut(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <select id="outSKU" required class="border p-2 rounded"></select>
+            <input type="number" id="outQty" placeholder="Quantity" required class="border p-2 rounded">
+            <select id="outReason" class="border p-2 rounded">
+              <option>Damage</option>
+              <option>Lost</option>
+              <option>Sample</option>
+              <option>Office Use</option>
+            </select>
+            <input type="text" id="outApproved" placeholder="Approved By" required class="border p-2 rounded">
+            <button type="submit" class="bg-rose-600 text-white font-semibold rounded p-2 hover:bg-rose-700">Record Stock Out</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 6. EXPENSE ENTRY -->
+      <section id="tab-expense" class="hidden space-y-4">
+        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+          <h3 class="font-bold text-gray-800 mb-4 text-sm">Add Operational Expense</h3>
+          <form id="expenseForm" onsubmit="saveExpense(event)" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <select id="expCategory" class="border p-2 rounded">
+              <option>Salary</option>
+              <option>Rent</option>
+              <option>Electricity</option>
+              <option>Courier</option>
+              <option>Transport</option>
+              <option>Marketing</option>
+              <option>Office Expense</option>
+              <option>Other</option>
+            </select>
+            <input type="number" id="expAmount" placeholder="Amount (৳)" required class="border p-2 rounded">
+            <select id="expAccount" class="border p-2 rounded">
+              <option>Cash in Hand</option>
+              <option>Bank</option>
+              <option>Mobile Banking</option>
+            </select>
+            <input type="text" id="expDesc" placeholder="Description / Note" class="border p-2 rounded md:col-span-2">
+            <button type="submit" class="bg-gray-800 text-white font-semibold rounded p-2 hover:bg-black">Save Expense</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- 7. P&L & CASH FLOW -->
+      <section id="tab-reports" class="hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- P&L Statement -->
+          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-gray-800 border-b pb-2 flex justify-between">
+              <span>Profit & Loss Statement</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded">Real-Time</span>
+            </h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>Sales Revenue:</span><span id="plSales" class="font-bold">৳0</span></div>
+              <div class="flex justify-between text-rose-600"><span>(-) Cost of Goods Sold (COGS):</span><span id="plCOGS">-৳0</span></div>
+              <hr>
+              <div class="flex justify-between font-bold text-base text-emerald-600"><span>Gross Profit:</span><span id="plGross">৳0</span></div>
+              <div class="flex justify-between text-rose-600 pt-2"><span>(-) Operational Expenses:</span><span id="plExpense">-৳0</span></div>
+              <hr>
+              <div class="flex justify-between font-black text-lg text-blue-600"><span>Net Profit / Loss:</span><span id="plNet">৳0</span></div>
+            </div>
+          </div>
+
+          <!-- Cash Breakdown -->
+          <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-gray-800 border-b pb-2">Cash & Accounts Breakdown</h3>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span>Cash in Hand:</span><span id="accCash" class="font-bold">৳0</span></div>
+              <div class="flex justify-between"><span>Bank Account:</span><span id="accBank" class="font-bold">৳0</span></div>
+              <div class="flex justify-between"><span>Mobile Banking:</span><span id="accMFS" class="font-bold">৳0</span></div>
+              <div class="flex justify-between"><span>Courier Pending:</span><span id="accCourier" class="font-bold">৳0</span></div>
+              <hr>
+              <div class="flex justify-between font-black text-base text-gray-900"><span>Total Available Balance:</span><span id="accTotal">৳0</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Printable Invoice (Thermal Print Format) -->
+  <div id="printReceipt" class="hidden p-4 text-xs font-mono max-w-xs mx-auto border bg-white">
+    <div class="text-center mb-3">
+      <h2 class="font-black text-sm">ENTERPRISE POS</h2>
+      <p>Invoice Receipt</p>
+      <p id="recDate" class="text-[10px]"></p>
+    </div>
+    <div id="recItems" class="divide-y divide-dashed border-y border-dashed py-2 space-y-1"></div>
+    <div class="pt-2 space-y-1">
+      <div class="flex justify-between"><span>Subtotal:</span><span id="recSub">৳0</span></div>
+      <div class="flex justify-between"><span>Discount:</span><span id="recDisc">৳0</span></div>
+      <div class="flex justify-between font-bold"><span>Grand Total:</span><span id="recTotal">৳0</span></div>
+      <div class="flex justify-between"><span>Paid:</span><span id="recPaid">৳0</span></div>
+      <div class="flex justify-between"><span>Due:</span><span id="recDue">৳0</span></div>
+    </div>
+    <p class="text-center mt-4 text-[10px]">Thank you for your business!</p>
+  </div>
+
+  <script>
+    // System Local Database Initialization
+    let products = JSON.parse(localStorage.getItem('erp_products')) || [
+      { sku: 'TS-001', name: 'Black T-Shirt', category: 'Clothing', buyPrice: 450, salePrice: 650, stock: 40, minStock: 10 },
+      { sku: 'PN-002', name: 'Denim Jeans', category: 'Clothing', buyPrice: 900, salePrice: 1400, stock: 25, minStock: 5 },
+      { sku: 'SH-003', name: 'Sneakers', category: 'Footwear', buyPrice: 1200, salePrice: 1950, stock: 4, minStock: 5 }
+    ];
+    let sales = JSON.parse(localStorage.getItem('erp_sales')) || [];
+    let expenses = JSON.parse(localStorage.getItem('erp_expenses')) || [];
+    let ledger = JSON.parse(localStorage.getItem('erp_ledger')) || [];
+
+    let cart = [];
+
+    function saveDB() {
+      localStorage.setItem('erp_products', JSON.stringify(products));
+      localStorage.setItem('erp_sales', JSON.stringify(sales));
+      localStorage.setItem('erp_expenses', JSON.stringify(expenses));
+      localStorage.setItem('erp_ledger', JSON.stringify(ledger));
+      updateUI();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('main section').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-slate-800', 'text-white'));
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      event.currentTarget.classList.add('bg-slate-800', 'text-white');
+      
+      const titles = {
+        dashboard: 'Business Dashboard',
+        pos: 'Point of Sale Terminal',
+        products: 'Product Inventory Management',
+        purchase: 'Stock In & Supplier Purchase',
+        stockout: 'Stock Out & Adjustments',
+        expense: 'Operational Expense Tracking',
+        reports: 'Profit & Loss & Financial Reports'
+      };
+      document.getElementById('sectionTitle').innerText = titles[tabId];
+      updateUI();
+    }
+
+    // Product Functions
+    function saveProduct(e) {
+      e.preventDefault();
+      const sku = document.getElementById('pSKU').value.trim();
+      const name = document.getElementById('pName').value.trim();
+      const category = document.getElementById('pCategory').value.trim();
+      const buyPrice = Number(document.getElementById('pBuyPrice').value);
+      const salePrice = Number(document.getElementById('pSalePrice').value);
+      const stock = Number(document.getElementById('pStock').value);
+      const minStock = Number(document.getElementById('pMinStock').value);
+
+      products.push({ sku, name, category, buyPrice, salePrice, stock, minStock });
+      saveDB();
+      document.getElementById('productForm').reset();
+    }
+
+    // Purchase Stock In
+    function savePurchase(e) {
+      e.preventDefault();
+      const sku = document.getElementById('purSKU').value;
+      const qty = Number(document.getElementById('purQty').value);
+      const price = Number(document.getElementById('purPrice').value);
+      const method = document.getElementById('purMethod').value;
+
+      const p = products.find(i => i.sku === sku);
+      if (p) {
+        p.stock += qty;
+        p.buyPrice = price;
+        ledger.push({ type: 'Out', amount: (qty * price), account: method, desc: `Purchase: ${sku}` });
+        saveDB();
+        document.getElementById('purchaseForm').reset();
+        alert('Stock successfully updated!');
+      }
+    }
+
+    // Stock Out
+    function saveStockOut(e) {
+      e.preventDefault();
+      const sku = document.getElementById('outSKU').value;
+      const qty = Number(document.getElementById('outQty').value);
+      const reason = document.getElementById('outReason').value;
+
+      const p = products.find(i => i.sku === sku);
+      if (p) {
+        if (p.stock < qty) return alert('Not enough stock to adjust!');
+        p.stock -= qty;
+        saveDB();
+        document.getElementById('stockOutForm').reset();
+        alert(`Stock Out Recorded: ${reason}`);
+      }
+    }
+
+    // Expense
+    function saveExpense(e) {
+      e.preventDefault();
+      const category = document.getElementById('expCategory').value;
+      const amount = Number(document.getElementById('expAmount').value);
+      const account = document.getElementById('expAccount').value;
+      const desc = document.getElementById('expDesc').value;
+
+      expenses.push({ category, amount, account, desc, date: new Date() });
+      ledger.push({ type: 'Out', amount, account, desc: `Expense: ${category}` });
+      saveDB();
+      document.getElementById('expenseForm').reset();
+      alert('Expense recorded!');
+    }
+
+    // POS Engine
+    function renderPosProducts() {
+      const q = document.getElementById('posSearch').value.toLowerCase();
+      const grid = document.getElementById('posProductGrid');
+      grid.innerHTML = '';
+
+      products.filter(p => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q)).forEach(p => {
+        grid.innerHTML += `
+          <div onclick="addToCart('${p.sku}')" class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:border-blue-500 transition">
+            <h4 class="font-bold text-gray-800 text-sm">${p.name}</h4>
+            <p class="text-xs text-gray-500">SKU: ${p.sku}</p>
+            <div class="flex justify-between items-center mt-3">
+              <span class="font-bold text-blue-600">৳${p.salePrice}</span>
+              <span class="text-xs ${p.stock <= p.minStock ? 'text-rose-600 font-bold' : 'text-gray-500'}">Stock: ${p.stock}</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addToCart(sku) {
+      const p = products.find(i => i.sku === sku);
+      if (!p || p.stock <= 0) return alert('Out of stock!');
+
+      const existing = cart.find(i => i.sku === sku);
+      if (existing) {
+        if (existing.qty + 1 > p.stock) return alert('Cannot exceed current stock!');
+        existing.qty++;
+      } else {
+        cart.push({ ...p, qty: 1 });
+      }
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById('cartItemsList');
+      list.innerHTML = '';
+      cart.forEach((item, index) => {
+        list.innerHTML += `
+          <div class="py-2 flex justify-between items-center">
+            <div>
+              <p class="font-semibold text-xs">${item.name}</p>
+              <span class="text-[10px] text-gray-500">৳${item.salePrice} x ${item.qty}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs">৳${item.salePrice * item.qty}</span>
+              <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 text-xs"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        `;
+      });
+      calculatePosTotals();
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      renderCart();
+    }
+
+    function calculatePosTotals() {
+      const subtotal = cart.reduce((sum, item) => sum + (item.salePrice * item.qty), 0);
+      const discount = Number(document.getElementById('posDiscount').value) || 0;
+      const grandTotal = Math.max(0, subtotal - discount);
+      const paid = Number(document.getElementById('posPaid').value) || 0;
+      const due = Math.max(0, grandTotal - paid);
+
+      document.getElementById('posSubtotal').innerText = `৳${subtotal}`;
+      document.getElementById('posGrandTotal').innerText = `৳${grandTotal}`;
+      document.getElementById('posDue').innerText = `৳${due}`;
+    }
+
+    function processSale() {
+      if (cart.length === 0) return alert('Cart is empty!');
+      const subtotal = cart.reduce((sum, item) => sum + (item.salePrice * item.qty), 0);
+      const discount = Number(document.getElementById('posDiscount').value) || 0;
+      const grandTotal = Math.max(0, subtotal - discount);
+      const paid = Number(document.getElementById('posPaid').value) || 0;
+      const due = Math.max(0, grandTotal - paid);
+      const method = document.getElementById('posPaymentMethod').value;
+
+      let cogs = 0;
+      // Deduct stock & calculate COGS
+      cart.forEach(cartItem => {
+        const p = products.find(i => i.sku === cartItem.sku);
+        if (p) {
+          p.stock -= cartItem.qty;
+          cogs += (p.buyPrice * cartItem.qty);
+        }
+      });
+
+      sales.push({
+        id: 'INV-' + Date.now().toString().slice(-6),
+        date: new Date(),
+        subtotal,
+        discount,
+        grandTotal,
+        paid,
+        due,
+        cogs,
+        method,
+        items: [...cart]
+      });
+
+      if (paid > 0) {
+        ledger.push({ type: 'In', amount: paid, account: method, desc: 'POS Sale Collection' });
+      }
+
+      printThermalReceipt(cart, subtotal, discount, grandTotal, paid, due);
+      cart = [];
+      document.getElementById('posDiscount').value = 0;
+      document.getElementById('posPaid').value = 0;
+      renderCart();
+      saveDB();
+    }
+
+    function printThermalReceipt(items, sub, disc, grand, paid, due) {
+      document.getElementById('recDate').innerText = new Date().toLocaleString();
+      const recItems = document.getElementById('recItems');
+      recItems.innerHTML = '';
+      items.forEach(i => {
+        recItems.innerHTML += `<div class="flex justify-between"><span>${i.name} (${i.qty})</span><span>৳${i.salePrice * i.qty}</span></div>`;
+      });
+      document.getElementById('recSub').innerText = `৳${sub}`;
+      document.getElementById('recDisc').innerText = `৳${disc}`;
+      document.getElementById('recTotal').innerText = `৳${grand}`;
+      document.getElementById('recPaid').innerText = `৳${paid}`;
+      document.getElementById('recDue').innerText = `৳${due}`;
+
+      window.print();
+    }
+
+    // UI Updates and Core Metric Computations
+    function updateUI() {
+      // 1. Dashboard calculations
+      let totalSales = 0, totalCOGS = 0, totalCustDue = 0;
+      sales.forEach(s => {
+        totalSales += s.grandTotal;
+        totalCOGS += s.cogs;
+        totalCustDue += s.due;
+      });
+
+      let totalExp = expenses.reduce((sum, e) => sum + e.amount, 0);
+      let totalStockVal = products.reduce((sum, p) => sum + (p.buyPrice * p.stock), 0);
+      let grossProfit = totalSales - totalCOGS;
+      let netProfit = grossProfit - totalExp;
+
+      document.getElementById('dashTotalSales').innerText = `৳${totalSales.toLocaleString()}`;
+      document.getElementById('dashGrossProfit').innerText = `৳${grossProfit.toLocaleString()}`;
+      document.getElementById('dashNetProfit').innerText = `৳${netProfit.toLocaleString()}`;
+      document.getElementById('dashStockValue').innerText = `৳${totalStockVal.toLocaleString()}`;
+      document.getElementById('dashCustDue').innerText = `৳${totalCustDue.toLocaleString()}`;
+      document.getElementById('dashExpense').innerText = `৳${totalExp.toLocaleString()}`;
+
+      // 2. Low Stock Table
+      const lowBody = document.getElementById('lowStockTableBody');
+      lowBody.innerHTML = '';
+      products.filter(p => p.stock <= p.minStock).forEach(p => {
+        lowBody.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-2 font-mono">${p.sku}</td>
+            <td class="p-2">${p.name}</td>
+            <td class="p-2 font-bold text-rose-600">${p.stock}</td>
+            <td class="p-2">${p.minStock}</td>
+            <td class="p-2"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs">Low Stock</span></td>
+          </tr>
+        `;
+      });
+
+      // 3. Product Table & Dropdowns
+      const prodBody = document.getElementById('productTableBody');
+      const purSelect = document.getElementById('purSKU');
+      const outSelect = document.getElementById('outSKU');
+      prodBody.innerHTML = '';
+      purSelect.innerHTML = '';
+      outSelect.innerHTML = '';
+
+      products.forEach(p => {
+        prodBody.innerHTML += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-mono font-medium">${p.sku}</td>
+            <td class="p-3 font-semibold text-gray-800">${p.name}</td>
+            <td class="p-3">${p.category}</td>
+            <td class="p-3">৳${p.buyPrice}</td>
+            <td class="p-3 font-semibold text-blue-600">৳${p.salePrice}</td>
+            <td class="p-3 ${p.stock <= p.minStock ? 'text-rose-600 font-bold' : ''}">${p.stock}</td>
+            <td class="p-3">৳${(p.stock * p.buyPrice).toLocaleString()}</td>
+          </tr>
+        `;
+        purSelect.innerHTML += `<option value="${p.sku}">${p.name} (${p.sku})</option>`;
+        outSelect.innerHTML += `<option value="${p.sku}">${p.name} (${p.sku})</option>`;
+      });
+
+      // 4. Reports & Cash Flow
+      document.getElementById('plSales').innerText = `৳${totalSales.toLocaleString()}`;
+      document.getElementById('plCOGS').innerText = `-৳${totalCOGS.toLocaleString()}`;
+      document.getElementById('plGross').innerText = `৳${grossProfit.toLocaleString()}`;
+      document.getElementById('plExpense').innerText = `-৳${totalExp.toLocaleString()}`;
+      document.getElementById('plNet').innerText = `৳${netProfit.toLocaleString()}`;
+
+      // Accounts Breakdown
+      let balances = { 'Cash in Hand': 0, 'Bank': 0, 'Mobile Banking': 0, 'Courier Delivery': 0 };
+      ledger.forEach(entry => {
+        if (entry.type === 'In') balances[entry.account] = (balances[entry.account] || 0) + entry.amount;
+        if (entry.type === 'Out') balances[entry.account] = (balances[entry.account] || 0) - entry.amount;
+      });
+
+      document.getElementById('accCash').innerText = `৳${(balances['Cash in Hand'] || 0).toLocaleString()}`;
+      document.getElementById('accBank').innerText = `৳${(balances['Bank'] || 0).toLocaleString()}`;
+      document.getElementById('accMFS').innerText = `৳${(balances['Mobile Banking'] || 0).toLocaleString()}`;
+      document.getElementById('accCourier').innerText = `৳${(balances['Courier Delivery'] || 0).toLocaleString()}`;
+      
+      const totalAvailable = Object.values(balances).reduce((a, b) => a + b, 0);
+      document.getElementById('accTotal').innerText = `৳${totalAvailable.toLocaleString()}`;
+
+      renderPosProducts();
+    }
+
+    function clearDatabase() {
+      if (confirm('Demo ডেটা সম্পূর্ণ মুছে ফেলে রিসেট করতে চান?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    // Initial Load
+    updateUI();
+  </script>
+</body>
+</html>
